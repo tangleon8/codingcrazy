@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     APP_NAME: str = "CodingCrazy API"
     DEBUG: bool = True
 
-    # Database
-    DATABASE_URL: str = "postgresql://codingcrazy:codingcrazy_dev@localhost:5432/codingcrazy"
+    # Database (defaults to SQLite for easy local dev, use PostgreSQL in production)
+    DATABASE_URL: str = "sqlite:///./codingcrazy.db"
 
     # Auth
     SECRET_KEY: str = "dev-secret-key-change-in-production-must-be-at-least-32-chars"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     COOKIE_MAX_AGE: int = 60 * 60 * 24 * 7  # 7 days in seconds
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
 
     class Config:
         env_file = ".env"
