@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/lib/auth-context';
-import { api, Level } from '@/lib/api';
+import { useProgression } from '@/lib/progression-context';
+import { api, Level, CompleteQuestResponse } from '@/lib/api';
 import { useCodeRunner } from '@/hooks/use-code-runner';
 import { GameSimulator, GameState, LevelData, Action } from '@codingcrazy/engine';
 import Console from '@/components/Console';
@@ -19,8 +20,14 @@ type PlayState = 'idle' | 'running' | 'playing' | 'won' | 'lost';
 export default function PlayPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
+  const questId = searchParams.get('questId');
   const { user, isLoading: authLoading } = useAuth();
+  const { refreshProgression } = useProgression();
+
+  // Quest completion state
+  const [questResult, setQuestResult] = useState<CompleteQuestResponse | null>(null);
 
   // Level and game state
   const [level, setLevel] = useState<Level | null>(null);
@@ -158,15 +165,33 @@ export default function PlayPage() {
 
     try {
       const finalState = turnStates[turnStates.length - 1];
-      await api.submitCompletion(level.id, {
-        action_count: finalState.actionHistory.length,
-        coins_collected: finalState.collectedCoins.size,
-      });
-      router.push('/dashboard');
+
+      // Complete quest if this is a quest play
+      if (questId) {
+        const result = await api.completeQuest(
+          parseInt(questId),
+          finalState.actionHistory.length,
+          finalState.collectedCoins.size
+        );
+        setQuestResult(result);
+        await refreshProgression();
+
+        // Show result briefly before redirecting
+        setTimeout(() => {
+          router.push('/quests');
+        }, 2000);
+      } else {
+        // Regular level completion
+        await api.submitCompletion(level.id, {
+          action_count: finalState.actionHistory.length,
+          coins_collected: finalState.collectedCoins.size,
+        });
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit completion');
     }
-  }, [level, playState, turnStates, router]);
+  }, [level, playState, turnStates, router, questId, refreshProgression]);
 
   if (authLoading || !user) {
     return (
@@ -201,17 +226,67 @@ export default function PlayPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-game-bg to-game-panel">
+      {/* Quest Completion Modal */}
+      {questResult && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-xl border border-gray-700 p-8 max-w-md text-center">
+            <div className="text-6xl mb-4">
+              {questResult.stars_earned === 3 ? '\u{1F31F}' : questResult.stars_earned === 2 ? '\u{2B50}' : '\u{2728}'}
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Quest Complete!</h2>
+
+            {/* Stars */}
+            <div className="flex justify-center gap-2 mb-4">
+              {[1, 2, 3].map((star) => (
+                <span
+                  key={star}
+                  className={`text-3xl ${
+                    star <= questResult.stars_earned ? 'text-yellow-400' : 'text-gray-600'
+                  }`}
+                >
+                  {'\u2605'}
+                </span>
+              ))}
+            </div>
+
+            {/* Rewards */}
+            <div className="flex justify-center gap-6 mb-4">
+              <div className="text-center">
+                <div className="text-purple-400 text-xl font-bold">+{questResult.xp_gained}</div>
+                <div className="text-gray-400 text-sm">XP</div>
+              </div>
+              <div className="text-center">
+                <div className="text-yellow-400 text-xl font-bold">+{questResult.coins_gained}</div>
+                <div className="text-gray-400 text-sm">Coins</div>
+              </div>
+            </div>
+
+            {/* Level Up */}
+            {questResult.leveled_up && (
+              <div className="bg-purple-900/50 border border-purple-500 rounded-lg p-3 mb-4">
+                <div className="text-purple-400 font-bold text-lg">
+                  Level Up! You are now Level {questResult.new_level}!
+                </div>
+              </div>
+            )}
+
+            <div className="text-gray-400 text-sm">Returning to Quest Map...</div>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="border-b border-game-accent bg-game-bg/80 backdrop-blur-sm">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
             <div className="flex items-center gap-4">
-              <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+              <Link href={questId ? '/quests' : '/dashboard'} className="text-gray-400 hover:text-white transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </Link>
               <span className="text-lg font-bold text-white">{level.title}</span>
+              {questId && <span className="text-pink-400 text-sm">(Quest)</span>}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm">Level {level.order_index}</span>
