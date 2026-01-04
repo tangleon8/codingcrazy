@@ -581,44 +581,98 @@ export default function QuestPlayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Ambient background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-2 h-2 rounded-full bg-emerald-500/30 top-[10%] left-[15%] animate-pulse" />
+        <div className="absolute w-3 h-3 rounded-full bg-blue-500/30 top-[25%] left-[40%] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute w-2 h-2 rounded-full bg-purple-500/30 top-[15%] left-[70%] animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute w-3 h-3 rounded-full bg-emerald-500/30 top-[45%] left-[85%] animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute w-2 h-2 rounded-full bg-blue-500/30 top-[60%] left-[25%] animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute w-3 h-3 rounded-full bg-purple-500/30 top-[75%] left-[55%] animate-pulse" style={{ animationDelay: '2.5s' }} />
+        <div className="absolute w-2 h-2 rounded-full bg-emerald-500/30 top-[85%] left-[10%] animate-pulse" style={{ animationDelay: '3s' }} />
+        <div className="absolute w-3 h-3 rounded-full bg-blue-500/30 top-[50%] left-[65%] animate-pulse" style={{ animationDelay: '0.7s' }} />
+      </div>
+
       {/* Navigation */}
-      <nav className="border-b border-gray-700 bg-gray-900/90 backdrop-blur-sm">
+      <nav className="relative z-10 border-b border-emerald-900/30 bg-gradient-to-r from-[#0d1f35]/95 via-[#0f2a1f]/95 to-[#0d1f35]/95 backdrop-blur-md shadow-lg shadow-black/20">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
-              <Link href="/quests" className="text-gray-400 hover:text-white transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Link
+                href="/quests"
+                className="group flex items-center justify-center w-10 h-10 rounded-lg bg-gray-800/50 border border-gray-700/50 hover:border-emerald-500/50 hover:bg-emerald-900/20 transition-all duration-300"
+              >
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </Link>
-              <span className="text-lg font-bold text-white">{quest.title}</span>
-              <span className="text-sm text-gray-400">Quest #{quest.id}</span>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-lg shadow-lg shadow-emerald-500/20">
+                  ⚔️
+                </div>
+                <div>
+                  <span className="text-lg font-bold text-white block leading-tight">{quest.title}</span>
+                  <span className="text-xs text-emerald-400/70">Quest #{quest.id} • Level 1</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-purple-400">+{quest.xpReward} XP</span>
-              <span className="text-sm text-yellow-400">+{quest.coinReward} coins</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-900/30 border border-purple-500/30">
+                <span className="text-lg">✨</span>
+                <span className="text-sm font-semibold text-purple-300">+{quest.xpReward} XP</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-900/30 border border-yellow-500/30">
+                <span className="text-lg">🪙</span>
+                <span className="text-sm font-semibold text-yellow-300">+{quest.coinReward}</span>
+              </div>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <main className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left: Game Canvas */}
-          <div className="flex flex-col gap-4">
-            {/* Game Board */}
-            <div
-              className="rounded-xl border-4 border-green-800 overflow-hidden relative"
-              style={{
-                width: GRID_SIZE * CELL_SIZE + 16,
-                height: GRID_SIZE * CELL_SIZE + 16,
-                backgroundImage: `url(${ASSETS.background})`,
-                backgroundSize: 'cover',
-                padding: 8,
-              }}
-            >
+          <div className="flex flex-col gap-5">
+            {/* Game Board with decorative frame */}
+            <div className="relative">
+              {/* Outer glow */}
+              <div
+                className="absolute -inset-2 rounded-2xl opacity-50 blur-xl"
+                style={{ background: 'linear-gradient(135deg, #22C55E 0%, #059669 50%, #047857 100%)' }}
+              />
+
+              {/* Decorative corner vines */}
+              <div className="absolute -top-3 -left-3 text-3xl transform -rotate-45 opacity-70 z-20">🌿</div>
+              <div className="absolute -top-3 -right-3 text-3xl transform rotate-45 opacity-70 z-20">🌿</div>
+              <div className="absolute -bottom-3 -left-3 text-3xl transform rotate-45 opacity-70 z-20">🍃</div>
+              <div className="absolute -bottom-3 -right-3 text-3xl transform -rotate-45 opacity-70 z-20">🍃</div>
+
+              {/* Main frame */}
+              <div
+                className="relative rounded-xl overflow-hidden"
+                style={{
+                  width: GRID_SIZE * CELL_SIZE + 24,
+                  height: GRID_SIZE * CELL_SIZE + 24,
+                  background: 'linear-gradient(135deg, #1a4731 0%, #14532d 50%, #166534 100%)',
+                  padding: 4,
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,197,94,0.3)',
+                }}
+              >
+                {/* Inner border */}
+                <div
+                  className="rounded-lg overflow-hidden relative"
+                  style={{
+                    width: GRID_SIZE * CELL_SIZE + 16,
+                    height: GRID_SIZE * CELL_SIZE + 16,
+                    backgroundImage: `url(${ASSETS.background})`,
+                    backgroundSize: 'cover',
+                    padding: 8,
+                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
+                  }}
+                >
               {/* Grid */}
               <div
                 className="relative"
@@ -749,121 +803,253 @@ export default function QuestPlayPage() {
               {/* Win/Lose Overlay */}
               {gameState && (gameState.isWon || gameState.isLost) && (
                 <div
-                  className="absolute inset-0 flex items-center justify-center"
+                  className="absolute inset-0 flex items-center justify-center backdrop-blur-sm"
                   style={{
-                    backgroundColor: gameState.isWon ? 'rgba(34, 197, 94, 0.8)' : 'rgba(220, 38, 38, 0.8)',
+                    background: gameState.isWon
+                      ? 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.9) 0%, rgba(22, 101, 52, 0.95) 100%)'
+                      : 'radial-gradient(ellipse at center, rgba(220, 38, 38, 0.9) 0%, rgba(127, 29, 29, 0.95) 100%)',
                   }}
                 >
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">
+                  {/* Celebration particles for win */}
+                  {gameState.isWon && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      {[...Array(12)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute text-2xl"
+                          style={{
+                            left: `${10 + (i * 8)}%`,
+                            animation: `confettiFall ${2 + Math.random()}s ease-in-out infinite`,
+                            animationDelay: `${i * 0.1}s`,
+                          }}
+                        >
+                          {['⭐', '✨', '🌟', '💫'][i % 4]}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="text-center relative z-10">
+                    <div
+                      className="text-7xl mb-4"
+                      style={{ animation: gameState.isWon ? 'celebrateBounce 0.6s ease-out' : 'shake 0.5s ease-in-out' }}
+                    >
                       {gameState.isWon ? '🎉' : '💀'}
                     </div>
-                    <div className="text-3xl font-bold text-white">
+                    <div
+                      className="text-4xl font-bold text-white mb-2"
+                      style={{ textShadow: '0 4px 12px rgba(0,0,0,0.4)' }}
+                    >
                       {gameState.isWon ? 'Quest Complete!' : 'Try Again!'}
                     </div>
                     {gameState.isWon && (
-                      <div className="mt-4 flex justify-center gap-1">
-                        {[1, 2, 3].map(star => (
-                          <span
-                            key={star}
-                            className="text-4xl"
-                            style={{
-                              color: star <= (gameState.collectedCoins.size === config.coins.length ? 3 :
-                                     gameState.collectedCoins.size > 0 ? 2 : 1)
-                                ? '#F59E0B' : '#4B5563',
-                            }}
-                          >
-                            ★
-                          </span>
-                        ))}
+                      <>
+                        <div className="mt-4 flex justify-center gap-2">
+                          {[1, 2, 3].map(star => {
+                            const earned = star <= (gameState.collectedCoins.size === config.coins.length ? 3 :
+                                           gameState.collectedCoins.size > 0 ? 2 : 1);
+                            return (
+                              <span
+                                key={star}
+                                className="text-5xl transition-all duration-300"
+                                style={{
+                                  color: earned ? '#FBBF24' : '#374151',
+                                  filter: earned ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' : 'none',
+                                  animation: earned ? `starPop 0.4s ease-out ${star * 0.15}s both` : 'none',
+                                }}
+                              >
+                                ★
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="mt-3 text-emerald-200 text-sm">
+                          Coins collected: {gameState.collectedCoins.size}/{config.coins.length}
+                        </div>
+                      </>
+                    )}
+                    {gameState.isLost && (
+                      <div className="mt-3 text-red-200 text-sm">
+                        Don&apos;t give up! Try a different approach.
                       </div>
                     )}
                   </div>
                 </div>
               )}
+              </div>
+              </div>
+              </div>
             </div>
 
             {/* Status Bar */}
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-400">Turn:</span>
-                  <span className="text-white font-bold">{gameState?.turn || 0}</span>
+            <div className="relative">
+              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-emerald-600/20 via-blue-600/20 to-purple-600/20 blur-sm" />
+              <div className="relative bg-gradient-to-r from-gray-800/95 to-gray-900/95 rounded-xl p-4 border border-gray-700/50 backdrop-blur-sm flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-900/50 border border-blue-500/30 flex items-center justify-center">
+                      <span className="text-xl">⏱️</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide">Turn</div>
+                      <div className="text-xl font-bold text-white">{gameState?.turn || 0}</div>
+                    </div>
+                  </div>
+                  <div className="w-px h-10 bg-gray-700" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-900/50 border border-yellow-500/30 flex items-center justify-center">
+                      <span className="text-xl">🪙</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wide">Coins</div>
+                      <div className="text-xl font-bold">
+                        <span className="text-yellow-400">{gameState?.collectedCoins.size || 0}</span>
+                        <span className="text-gray-500">/{config.coins.length}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-400">Coins:</span>
-                  <span className="text-yellow-400 font-bold">
-                    {gameState?.collectedCoins.size || 0}/{config.coins.length}
-                  </span>
+                <div>
+                  {isRunning && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 border border-blue-500/40 text-blue-300 text-sm rounded-full">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                      Running...
+                    </div>
+                  )}
+                  {gameState?.isWon && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 text-sm rounded-full">
+                      <span>✓</span> Success!
+                    </div>
+                  )}
+                  {gameState?.isLost && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-red-600/20 border border-red-500/40 text-red-300 text-sm rounded-full">
+                      <span>✕</span> Failed
+                    </div>
+                  )}
+                  {!isRunning && !gameState?.isWon && !gameState?.isLost && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-700/30 border border-gray-600/40 text-gray-400 text-sm rounded-full">
+                      Ready
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div>
-                {isRunning && (
-                  <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full animate-pulse">
-                    Running...
-                  </span>
-                )}
-                {gameState?.isWon && (
-                  <span className="px-3 py-1 bg-green-600 text-white text-sm rounded-full">
-                    Success!
-                  </span>
-                )}
-                {gameState?.isLost && (
-                  <span className="px-3 py-1 bg-red-600 text-white text-sm rounded-full">
-                    Failed
-                  </span>
-                )}
               </div>
             </div>
           </div>
 
           {/* Right: Instructions + Code Editor */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             {/* Instructions */}
-            <div className="bg-gray-800 rounded-xl border border-gray-700 p-5">
-              <div
-                className="prose prose-invert prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: config.instructions
-                    .replace(/^# (.+)$/gm, '<h2 class="text-xl font-bold text-green-400 mb-3">$1</h2>')
-                    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white">$1</strong>')
-                    .replace(/`([^`]+)`/g, '<code class="bg-gray-900 px-2 py-0.5 rounded text-green-400 font-mono">$1</code>')
-                    .replace(/\n\n/g, '</p><p class="mb-2 text-gray-300">')
-                    .replace(/\n/g, '<br>')
-                }}
-              />
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+
+              <div className="relative bg-gradient-to-br from-[#1a1510] to-[#0f0d0a] rounded-xl border border-amber-900/30 overflow-hidden">
+                {/* Header */}
+                <div className="px-5 py-3 bg-gradient-to-r from-amber-900/30 to-orange-900/20 border-b border-amber-800/30 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <span className="text-lg">📜</span>
+                  </div>
+                  <span className="text-amber-200 font-semibold">Quest Instructions</span>
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <div
+                    className="prose prose-invert prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: config.instructions
+                        .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text text-transparent mb-4">$1</h2>')
+                        .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-amber-100 font-semibold">$1</strong>')
+                        .replace(/`([^`]+)`/g, '<code class="bg-gray-900/80 px-2 py-1 rounded-md text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code>')
+                        .replace(/- `([^`]+)`/g, '<div class="flex items-center gap-2 my-1.5"><span class="text-amber-500">→</span><code class="bg-gray-900/80 px-2 py-1 rounded-md text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code></div>')
+                        .replace(/\n\n/g, '</p><p class="mb-3 text-gray-300 leading-relaxed">')
+                        .replace(/\n/g, '<br>')
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Code Editor */}
-            <div className="flex-1 min-h-[250px]">
-              <div className="h-full bg-gray-900 rounded-xl border border-gray-700 overflow-hidden">
-                <div className="bg-gray-800 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
-                  <span className="text-sm text-gray-400 font-mono">main.js</span>
-                  <span className="text-xs text-gray-500">Write your commands here</span>
+            <div className="flex-1 min-h-[250px] relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-500 blur-sm" />
+
+              <div className="h-full relative bg-[#0a0f14] rounded-xl border border-emerald-900/30 overflow-hidden shadow-2xl shadow-black/30">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-[#0f1a1a] to-[#0a1414] px-4 py-3 border-b border-emerald-900/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                      <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-800/50 rounded-md border border-gray-700/50">
+                      <span className="text-emerald-400 text-sm">📄</span>
+                      <span className="text-sm text-gray-300 font-mono">main.js</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500 italic">Write your commands here</span>
                 </div>
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  disabled={isRunning}
-                  className="w-full h-[calc(100%-40px)] bg-gray-900 text-green-400 font-mono text-sm p-4 resize-none focus:outline-none"
-                  style={{ minHeight: 200 }}
-                  spellCheck={false}
-                />
+                {/* Line numbers + Editor */}
+                <div className="flex h-[calc(100%-48px)]">
+                  {/* Line numbers */}
+                  <div className="bg-[#080c10] text-gray-600 font-mono text-sm py-4 px-3 border-r border-gray-800/50 select-none">
+                    {code.split('\n').map((_, i) => (
+                      <div key={i} className="leading-6 text-right">{i + 1}</div>
+                    ))}
+                  </div>
+                  <textarea
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    disabled={isRunning}
+                    className="flex-1 bg-transparent text-emerald-400 font-mono text-sm p-4 resize-none focus:outline-none leading-6 placeholder:text-gray-600"
+                    style={{ minHeight: 200 }}
+                    spellCheck={false}
+                    placeholder="// Start coding here..."
+                  />
+                </div>
               </div>
             </div>
 
             {/* Console */}
-            <div className="bg-gray-900 rounded-xl border border-gray-700 h-32 overflow-hidden">
-              <div className="bg-gray-800 px-4 py-2 border-b border-gray-700">
-                <span className="text-sm text-gray-400">Console</span>
-              </div>
-              <div className="p-3 h-[calc(100%-36px)] overflow-y-auto font-mono text-sm">
-                {consoleOutput.map((line, i) => (
-                  <div key={i} className="text-gray-300">{line}</div>
-                ))}
-                {error && (
-                  <div className="text-red-400">Error: {error}</div>
-                )}
+            <div className="relative">
+              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-gray-600/10 via-gray-500/10 to-gray-600/10 blur-sm" />
+              <div className="relative bg-[#0a0a0c] rounded-xl border border-gray-800/50 h-36 overflow-hidden shadow-inner">
+                <div className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 px-4 py-2.5 border-b border-gray-800/50 flex items-center gap-2">
+                  <span className="text-lg">💻</span>
+                  <span className="text-sm text-gray-400 font-medium">Console Output</span>
+                  {consoleOutput.length > 0 && (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-gray-700/50 rounded-full text-gray-500">
+                      {consoleOutput.length} lines
+                    </span>
+                  )}
+                </div>
+                <div className="p-3 h-[calc(100%-42px)] overflow-y-auto font-mono text-sm space-y-1">
+                  {consoleOutput.length === 0 && !error && (
+                    <div className="text-gray-600 italic">Output will appear here...</div>
+                  )}
+                  {consoleOutput.map((line, i) => (
+                    <div
+                      key={i}
+                      className={`${
+                        line.includes('SUCCESS') ? 'text-emerald-400' :
+                        line.includes('collected') ? 'text-yellow-400' :
+                        line.includes('Blocked') ? 'text-orange-400' :
+                        line.startsWith('>') ? 'text-cyan-400' :
+                        'text-gray-400'
+                      }`}
+                    >
+                      {line}
+                    </div>
+                  ))}
+                  {error && (
+                    <div className="text-red-400 flex items-center gap-2">
+                      <span>⚠️</span>
+                      <span>{error}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -872,34 +1058,55 @@ export default function QuestPlayPage() {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="flex-1 py-3 rounded-lg font-bold text-white transition-all hover:brightness-110 disabled:opacity-50"
+                className="group relative flex-1 py-3.5 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                 style={{
                   background: 'linear-gradient(180deg, #22C55E 0%, #16A34A 100%)',
-                  boxShadow: '0 4px 0 #15803D',
+                  boxShadow: '0 4px 0 #15803D, 0 8px 20px rgba(34, 197, 94, 0.3)',
                 }}
               >
-                {isRunning ? '⏳ Running...' : '▶ Run Code'}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {isRunning ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      Running...
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg">▶</span>
+                      Run Code
+                    </>
+                  )}
+                </span>
+                <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
               <button
                 onClick={initGame}
-                className="py-3 px-6 rounded-lg font-bold text-white transition-all hover:brightness-110"
+                className="group relative py-3.5 px-6 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'linear-gradient(180deg, #4B5563 0%, #374151 100%)',
-                  boxShadow: '0 4px 0 #1F2937',
+                  boxShadow: '0 4px 0 #1F2937, 0 8px 20px rgba(0, 0, 0, 0.2)',
                 }}
               >
-                ↻ Reset
+                <span className="relative z-10 flex items-center gap-2">
+                  <span className="text-lg">↻</span>
+                  Reset
+                </span>
+                <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
               {gameState?.isWon && (
                 <button
                   onClick={handleComplete}
-                  className="py-3 px-6 rounded-lg font-bold text-white transition-all hover:brightness-110"
+                  className="group relative py-3.5 px-6 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-pulse"
                   style={{
                     background: 'linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)',
-                    boxShadow: '0 4px 0 #6D28D9',
+                    boxShadow: '0 4px 0 #6D28D9, 0 8px 20px rgba(139, 92, 246, 0.4)',
                   }}
                 >
-                  ✓ Complete Quest
+                  <span className="relative z-10 flex items-center gap-2">
+                    <span className="text-lg">✓</span>
+                    Complete Quest
+                  </span>
+                  <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               )}
             </div>
@@ -920,6 +1127,67 @@ export default function QuestPlayPage() {
         @keyframes boarIdle {
           from { background-position: 0 0; }
           to { background-position: -${CELL_SIZE * 4}px 0; }
+        }
+        @keyframes floatParticle {
+          0%, 100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.3;
+          }
+          25% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.5;
+          }
+          50% {
+            transform: translateY(-40px) translateX(-5px);
+            opacity: 0.3;
+          }
+          75% {
+            transform: translateY(-20px) translateX(15px);
+            opacity: 0.5;
+          }
+        }
+        @keyframes confettiFall {
+          0% {
+            transform: translateY(-20px) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100%) rotate(720deg);
+            opacity: 0;
+          }
+        }
+        @keyframes celebrateBounce {
+          0% {
+            transform: scale(0) rotate(-10deg);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.3) rotate(5deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-10px) rotate(-3deg); }
+          40% { transform: translateX(10px) rotate(3deg); }
+          60% { transform: translateX(-10px) rotate(-3deg); }
+          80% { transform: translateX(10px) rotate(3deg); }
+        }
+        @keyframes starPop {
+          0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+          }
+          60% {
+            transform: scale(1.4) rotate(20deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
         }
       `}</style>
     </div>
