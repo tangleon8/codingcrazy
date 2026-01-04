@@ -76,20 +76,26 @@ export default function QuestsPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0a0806' }}>
       {/* Navigation */}
-      <nav className="border-b border-gray-700 bg-gray-900/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <nav
+        className="border-b-2 px-4"
+        style={{
+          background: 'linear-gradient(180deg, #1a1410 0%, #0f0c08 100%)',
+          borderColor: '#3d2817',
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center h-14">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-white">
-                Coding<span className="text-pink-500">Crazy</span>
+              <span className="text-xl font-bold text-amber-100">
+                Coding<span className="text-orange-400">Crazy</span>
               </span>
             </Link>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-amber-200/70 hover:text-amber-100 transition-colors text-sm"
               >
                 Dashboard
               </Link>
@@ -97,22 +103,22 @@ export default function QuestsPage() {
                 <>
                   <Link
                     href="/admin"
-                    className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                    className="text-yellow-400 hover:text-yellow-300 transition-colors text-sm"
                   >
                     Admin
                   </Link>
                   <button
                     onClick={handleResetProgress}
-                    className="text-red-400 hover:text-red-300 transition-colors text-sm"
+                    className="text-red-400 hover:text-red-300 transition-colors text-xs"
                   >
-                    Reset Progress
+                    Reset
                   </button>
                 </>
               )}
-              <span className="text-gray-400">{user.email}</span>
+              <span className="text-amber-200/50 text-sm">{user.email}</span>
               <button
                 onClick={handleLogout}
-                className="text-gray-300 hover:text-white transition-colors"
+                className="text-amber-200/70 hover:text-amber-100 transition-colors text-sm"
               >
                 Log Out
               </button>
