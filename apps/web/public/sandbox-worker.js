@@ -86,25 +86,19 @@ self.onmessage = function (e) {
   try {
     // Create a function with restricted scope
     // The user code can only access: hero, console
+    // We pass undefined values for dangerous globals as parameters
     const restrictedFunction = new Function(
       'hero',
       'console',
-      `
-      "use strict";
-      // Block access to globals
-      const window = undefined;
-      const document = undefined;
-      const self = undefined;
-      const globalThis = undefined;
-      const eval = undefined;
-      const Function = undefined;
-
-      ${code}
-      `
+      'window',
+      'document',
+      'self',
+      'globalThis',
+      code
     );
 
-    // Execute with timeout check wrapper
-    restrictedFunction(hero, safeConsole);
+    // Execute with undefined values for dangerous globals
+    restrictedFunction(hero, safeConsole, undefined, undefined, undefined, undefined);
 
     clearTimeout(timeoutId);
 

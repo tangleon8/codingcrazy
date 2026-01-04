@@ -112,6 +112,20 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Quest Map CTA */}
+        <div className="bg-game-panel rounded-xl border border-game-accent p-8 text-center mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4">Ready for Adventure?</h2>
+          <p className="text-gray-400 mb-6 max-w-xl mx-auto">
+            Explore the Quest Map to find challenges, earn XP and coins, unlock characters, and level up your coding skills!
+          </p>
+          <Link
+            href="/quests"
+            className="inline-block bg-game-highlight text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-game-highlight/80 transition-colors"
+          >
+            Open Quest Map
+          </Link>
+        </div>
+
         {/* Loading State */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -127,12 +141,17 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          /* Level Grid */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {progress.map((level) => (
-              <LevelCard key={level.level_id} level={level} />
-            ))}
-          </div>
+          /* Level Grid - Legacy levels (optional, can be hidden) */
+          progress.length > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-4">Legacy Levels</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {progress.map((level) => (
+                  <LevelCard key={level.level_id} level={level} />
+                ))}
+              </div>
+            </div>
+          )
         )}
       </main>
     </div>

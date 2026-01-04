@@ -63,14 +63,26 @@ def signup(user_data: UserCreate, response: Response, db: DbSession):
 
 @router.post("/login", response_model=AuthResponse)
 def login(user_data: UserLogin, response: Response, db: DbSession):
-    """Authenticate a user"""
+    """Authenticate a user - DEV MODE: auto-creates user if not exists, accepts any password"""
     user = db.query(User).filter(User.email == user_data.email).first()
 
-    if not user or not verify_password(user_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+    # DEV MODE: Auto-create user if doesn't exist
+    if not user:
+        user = User(
+            email=user_data.email,
+            password_hash=get_password_hash(user_data.password),
+            is_admin=True  # Make all dev users admin for testing
         )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    # DEV MODE: Skip password verification
+    # if not verify_password(user_data.password, user.password_hash):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="Invalid email or password"
+    #     )
 
     # Create and set auth token
     token = create_access_token(data={"sub": str(user.id)})

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
+import { ProgressionProvider } from '@/lib/progression-context';
 
 export const metadata: Metadata = {
   title: 'CodingCrazy - Learn to Code by Playing',
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
+          <ProgressionProvider>
+            {children}
+          </ProgressionProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { GameState, LevelData, posKey } from '@codingcrazy/engine';
 
@@ -11,16 +11,23 @@ interface GameCanvasProps {
   onAnimationComplete?: () => void;
 }
 
-const TILE_SIZE = 48;
+const TILE_SIZE = 64;
 const COLORS = {
   background: 0x1a1a2e,
   grid: 0x0f3460,
-  wall: 0x4a4a6a,
-  goal: 0x22c55e,
+  gridLine: 0x2a4a6e,
+  wall: 0x4a5568,
+  wallDark: 0x2d3748,
+  goal: 0x10b981,
+  goalLight: 0x34d399,
   coin: 0xfbbf24,
+  coinLight: 0xfcd34d,
   hero: 0x3b82f6,
+  heroLight: 0x60a5fa,
+  heroDark: 0x1d4ed8,
   hazardActive: 0xef4444,
   hazardInactive: 0x7f1d1d,
+  skin: 0xfdbf6f,
 };
 
 export default function GameCanvas({
@@ -33,11 +40,9 @@ export default function GameCanvas({
   const gameRef = useRef<Phaser.Game | null>(null);
   const sceneRef = useRef<GameScene | null>(null);
 
-  // Create/update game when level data changes
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Destroy existing game
     if (gameRef.current) {
       gameRef.current.destroy(true);
     }
@@ -61,7 +66,6 @@ export default function GameCanvas({
     const game = new Phaser.Game(config);
     gameRef.current = game;
 
-    // Add the scene after game is created
     const scene = new GameScene(levelData);
     sceneRef.current = scene;
     game.scene.add('game', scene, true);
@@ -73,7 +77,6 @@ export default function GameCanvas({
     };
   }, [levelData]);
 
-  // Update scene when game state changes
   useEffect(() => {
     if (sceneRef.current && gameState) {
       sceneRef.current.updateState(gameState, isPlaying, onAnimationComplete);
@@ -91,10 +94,10 @@ export default function GameCanvas({
 
 class GameScene extends Phaser.Scene {
   private levelData: LevelData;
-  private heroSprite: Phaser.GameObjects.Rectangle | null = null;
-  private coinSprites: Map<string, Phaser.GameObjects.Arc> = new Map();
-  private hazardSprites: Map<string, Phaser.GameObjects.Rectangle> = new Map();
-  private currentState: GameState | null = null;
+  private heroContainer: Phaser.GameObjects.Container | null = null;
+  private heroBody: Phaser.GameObjects.Graphics | null = null;
+  private coinSprites: Map<string, Phaser.GameObjects.Container> = new Map();
+  private hazardSprites: Map<string, Phaser.GameObjects.Container> = new Map();
   private animationCallback: (() => void) | undefined;
 
   constructor(levelData: LevelData) {
@@ -114,61 +117,108 @@ class GameScene extends Phaser.Scene {
   private drawGrid() {
     const { gridWidth, gridHeight } = this.levelData;
     const graphics = this.add.graphics();
-    graphics.lineStyle(1, COLORS.grid, 0.3);
 
-    // Draw grid lines
-    for (let x = 0; x <= gridWidth; x++) {
-      graphics.lineBetween(x * TILE_SIZE, 0, x * TILE_SIZE, gridHeight * TILE_SIZE);
-    }
-    for (let y = 0; y <= gridHeight; y++) {
-      graphics.lineBetween(0, y * TILE_SIZE, gridWidth * TILE_SIZE, y * TILE_SIZE);
-    }
-
-    // Draw cell backgrounds
+    // Draw tiles with gradient effect
     for (let x = 0; x < gridWidth; x++) {
       for (let y = 0; y < gridHeight; y++) {
-        const rect = this.add.rectangle(
-          x * TILE_SIZE + TILE_SIZE / 2,
-          y * TILE_SIZE + TILE_SIZE / 2,
-          TILE_SIZE - 2,
-          TILE_SIZE - 2,
-          COLORS.grid,
-          0.2
-        );
-        rect.setStrokeStyle(1, COLORS.grid, 0.3);
+        const tileX = x * TILE_SIZE;
+        const tileY = y * TILE_SIZE;
+
+        // Tile background
+        graphics.fillStyle(COLORS.grid, 0.4);
+        graphics.fillRoundedRect(tileX + 2, tileY + 2, TILE_SIZE - 4, TILE_SIZE - 4, 4);
+
+        // Subtle inner highlight
+        graphics.fillStyle(COLORS.gridLine, 0.2);
+        graphics.fillRoundedRect(tileX + 4, tileY + 4, TILE_SIZE - 8, TILE_SIZE - 8, 3);
       }
     }
   }
 
   private drawWalls() {
     for (const wall of this.levelData.walls) {
-      this.add.rectangle(
-        wall.x * TILE_SIZE + TILE_SIZE / 2,
-        wall.y * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE - 2,
-        TILE_SIZE - 2,
-        COLORS.wall
-      );
+      const x = wall.x * TILE_SIZE + TILE_SIZE / 2;
+      const y = wall.y * TILE_SIZE + TILE_SIZE / 2;
+
+      const graphics = this.add.graphics();
+
+      // Wall shadow
+      graphics.fillStyle(0x000000, 0.3);
+      graphics.fillRoundedRect(-TILE_SIZE/2 + 4, -TILE_SIZE/2 + 4, TILE_SIZE - 4, TILE_SIZE - 4, 6);
+
+      // Wall body - brick pattern
+      graphics.fillStyle(COLORS.wallDark);
+      graphics.fillRoundedRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 4, TILE_SIZE - 4, 6);
+
+      graphics.fillStyle(COLORS.wall);
+      graphics.fillRoundedRect(-TILE_SIZE/2 + 2, -TILE_SIZE/2 + 2, TILE_SIZE - 6, TILE_SIZE - 6, 5);
+
+      // Brick lines
+      graphics.lineStyle(2, COLORS.wallDark, 0.5);
+      graphics.lineBetween(-TILE_SIZE/2 + 6, 0, TILE_SIZE/2 - 6, 0);
+      graphics.lineBetween(0, -TILE_SIZE/2 + 6, 0, -4);
+      graphics.lineBetween(-TILE_SIZE/4, 4, -TILE_SIZE/4, TILE_SIZE/2 - 6);
+      graphics.lineBetween(TILE_SIZE/4, 4, TILE_SIZE/4, TILE_SIZE/2 - 6);
+
+      graphics.setPosition(x, y);
     }
   }
 
   private drawGoals() {
     for (const goal of this.levelData.goals) {
-      const rect = this.add.rectangle(
-        goal.x * TILE_SIZE + TILE_SIZE / 2,
-        goal.y * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE - 4,
-        TILE_SIZE - 4,
-        COLORS.goal,
-        0.3
-      );
-      rect.setStrokeStyle(3, COLORS.goal);
+      const x = goal.x * TILE_SIZE + TILE_SIZE / 2;
+      const y = goal.y * TILE_SIZE + TILE_SIZE / 2;
 
-      // Add pulsing animation
+      const container = this.add.container(x, y);
+
+      // Glowing platform
+      const glow = this.add.graphics();
+      glow.fillStyle(COLORS.goal, 0.3);
+      glow.fillCircle(0, 0, TILE_SIZE / 2);
+      container.add(glow);
+
+      // Flag pole
+      const pole = this.add.graphics();
+      pole.fillStyle(0x8b4513);
+      pole.fillRect(-2, -TILE_SIZE/2 + 8, 4, TILE_SIZE - 16);
+      container.add(pole);
+
+      // Flag
+      const flag = this.add.graphics();
+      flag.fillStyle(COLORS.goal);
+      flag.beginPath();
+      flag.moveTo(2, -TILE_SIZE/2 + 8);
+      flag.lineTo(TILE_SIZE/3, -TILE_SIZE/4);
+      flag.lineTo(2, -TILE_SIZE/6);
+      flag.closePath();
+      flag.fill();
+
+      // Flag highlight
+      flag.fillStyle(COLORS.goalLight, 0.5);
+      flag.beginPath();
+      flag.moveTo(2, -TILE_SIZE/2 + 8);
+      flag.lineTo(TILE_SIZE/4, -TILE_SIZE/3);
+      flag.lineTo(2, -TILE_SIZE/4);
+      flag.closePath();
+      flag.fill();
+      container.add(flag);
+
+      // Animate glow
       this.tweens.add({
-        targets: rect,
+        targets: glow,
         alpha: { from: 0.3, to: 0.6 },
+        scaleX: { from: 1, to: 1.1 },
+        scaleY: { from: 1, to: 1.1 },
         duration: 1000,
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // Animate flag wave
+      this.tweens.add({
+        targets: flag,
+        scaleX: { from: 1, to: 0.9 },
+        duration: 500,
         yoyo: true,
         repeat: -1,
       });
@@ -178,22 +228,50 @@ class GameScene extends Phaser.Scene {
   private drawCoins() {
     for (const coin of this.levelData.coins) {
       const key = posKey(coin);
-      const circle = this.add.circle(
-        coin.x * TILE_SIZE + TILE_SIZE / 2,
-        coin.y * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE / 4,
-        COLORS.coin
-      );
-      circle.setStrokeStyle(2, 0xf59e0b);
-      this.coinSprites.set(key, circle);
+      const x = coin.x * TILE_SIZE + TILE_SIZE / 2;
+      const y = coin.y * TILE_SIZE + TILE_SIZE / 2;
 
-      // Add subtle rotation effect
+      const container = this.add.container(x, y);
+
+      // Coin glow
+      const glow = this.add.graphics();
+      glow.fillStyle(COLORS.coin, 0.3);
+      glow.fillCircle(0, 0, TILE_SIZE / 3);
+      container.add(glow);
+
+      // Coin body
+      const coinBody = this.add.graphics();
+      coinBody.fillStyle(COLORS.coin);
+      coinBody.fillCircle(0, 0, TILE_SIZE / 4);
+      coinBody.fillStyle(COLORS.coinLight);
+      coinBody.fillCircle(-3, -3, TILE_SIZE / 6);
+
+      // Dollar sign
+      coinBody.fillStyle(0xb45309);
+      coinBody.fillRect(-2, -8, 4, 16);
+      coinBody.fillRect(-6, -6, 12, 3);
+      coinBody.fillRect(-6, 3, 12, 3);
+      container.add(coinBody);
+
+      this.coinSprites.set(key, container);
+
+      // Spin animation
       this.tweens.add({
-        targets: circle,
-        scaleX: { from: 1, to: 0.8 },
-        duration: 500,
+        targets: container,
+        scaleX: { from: 1, to: 0.3 },
+        duration: 600,
         yoyo: true,
         repeat: -1,
+      });
+
+      // Float animation
+      this.tweens.add({
+        targets: container,
+        y: { from: y - 3, to: y + 3 },
+        duration: 800,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
       });
     }
   }
@@ -201,28 +279,171 @@ class GameScene extends Phaser.Scene {
   private drawHazards() {
     for (const hazard of this.levelData.hazards) {
       const key = posKey(hazard);
-      const rect = this.add.rectangle(
-        hazard.x * TILE_SIZE + TILE_SIZE / 2,
-        hazard.y * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE - 4,
-        TILE_SIZE - 4,
-        COLORS.hazardActive
-      );
-      this.hazardSprites.set(key, rect);
+      const x = hazard.x * TILE_SIZE + TILE_SIZE / 2;
+      const y = hazard.y * TILE_SIZE + TILE_SIZE / 2;
+
+      const container = this.add.container(x, y);
+
+      // Hazard base
+      const base = this.add.graphics();
+      base.fillStyle(0x1f1f1f);
+      base.fillRoundedRect(-TILE_SIZE/2 + 4, -TILE_SIZE/2 + 4, TILE_SIZE - 8, TILE_SIZE - 8, 4);
+      container.add(base);
+
+      // Spikes
+      const spikes = this.add.graphics();
+      this.drawSpikes(spikes, true);
+      container.add(spikes);
+
+      // Store reference
+      container.setData('spikes', spikes);
+      this.hazardSprites.set(key, container);
+    }
+  }
+
+  private drawSpikes(graphics: Phaser.GameObjects.Graphics, active: boolean) {
+    graphics.clear();
+    const color = active ? COLORS.hazardActive : COLORS.hazardInactive;
+    const alpha = active ? 1 : 0.5;
+
+    graphics.fillStyle(color, alpha);
+
+    // Draw 4 spikes
+    const spikePositions = [
+      { x: -12, y: 0 },
+      { x: 12, y: 0 },
+      { x: 0, y: -12 },
+      { x: 0, y: 12 },
+    ];
+
+    for (const pos of spikePositions) {
+      graphics.beginPath();
+      graphics.moveTo(pos.x, pos.y - 10);
+      graphics.lineTo(pos.x - 6, pos.y + 8);
+      graphics.lineTo(pos.x + 6, pos.y + 8);
+      graphics.closePath();
+      graphics.fill();
+    }
+
+    // Center spike
+    graphics.beginPath();
+    graphics.moveTo(0, -14);
+    graphics.lineTo(-8, 10);
+    graphics.lineTo(8, 10);
+    graphics.closePath();
+    graphics.fill();
+
+    // Highlight
+    if (active) {
+      graphics.fillStyle(0xff6b6b, 0.5);
+      graphics.beginPath();
+      graphics.moveTo(0, -12);
+      graphics.lineTo(-4, 4);
+      graphics.lineTo(4, 4);
+      graphics.closePath();
+      graphics.fill();
     }
   }
 
   private drawHero() {
     const { startPosition } = this.levelData;
-    this.heroSprite = this.add.rectangle(
-      startPosition.x * TILE_SIZE + TILE_SIZE / 2,
-      startPosition.y * TILE_SIZE + TILE_SIZE / 2,
-      TILE_SIZE - 8,
-      TILE_SIZE - 8,
-      COLORS.hero
-    );
-    this.heroSprite.setStrokeStyle(3, 0x60a5fa);
-    this.heroSprite.setDepth(10);
+    const x = startPosition.x * TILE_SIZE + TILE_SIZE / 2;
+    const y = startPosition.y * TILE_SIZE + TILE_SIZE / 2;
+
+    this.heroContainer = this.add.container(x, y);
+    this.heroContainer.setDepth(10);
+
+    // Shadow
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x000000, 0.3);
+    shadow.fillEllipse(0, TILE_SIZE/3, TILE_SIZE/2, TILE_SIZE/6);
+    this.heroContainer.add(shadow);
+
+    // Body
+    this.heroBody = this.add.graphics();
+    this.drawHeroGraphics(this.heroBody, 'normal');
+    this.heroContainer.add(this.heroBody);
+
+    // Idle animation - gentle bounce
+    this.tweens.add({
+      targets: this.heroContainer,
+      y: { from: y - 2, to: y + 2 },
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private drawHeroGraphics(graphics: Phaser.GameObjects.Graphics, state: 'normal' | 'dead' | 'won') {
+    graphics.clear();
+
+    let bodyColor = COLORS.hero;
+    let lightColor = COLORS.heroLight;
+
+    if (state === 'dead') {
+      bodyColor = 0xef4444;
+      lightColor = 0xf87171;
+    } else if (state === 'won') {
+      bodyColor = 0x22c55e;
+      lightColor = 0x4ade80;
+    }
+
+    // Body (rounded rectangle character)
+    graphics.fillStyle(bodyColor);
+    graphics.fillRoundedRect(-TILE_SIZE/3, -TILE_SIZE/3, TILE_SIZE/1.5, TILE_SIZE/1.5, 10);
+
+    // Body highlight
+    graphics.fillStyle(lightColor, 0.5);
+    graphics.fillRoundedRect(-TILE_SIZE/3 + 4, -TILE_SIZE/3 + 4, TILE_SIZE/2 - 4, TILE_SIZE/3, 8);
+
+    // Face
+    graphics.fillStyle(COLORS.skin);
+    graphics.fillCircle(0, -4, TILE_SIZE/5);
+
+    // Eyes
+    graphics.fillStyle(0xffffff);
+    graphics.fillCircle(-6, -6, 5);
+    graphics.fillCircle(6, -6, 5);
+
+    graphics.fillStyle(0x000000);
+    graphics.fillCircle(-5, -5, 3);
+    graphics.fillCircle(7, -5, 3);
+
+    // Eye shine
+    graphics.fillStyle(0xffffff);
+    graphics.fillCircle(-6, -7, 1.5);
+    graphics.fillCircle(6, -7, 1.5);
+
+    // Mouth
+    if (state === 'won') {
+      // Big smile
+      graphics.lineStyle(2, 0x000000);
+      graphics.beginPath();
+      graphics.arc(0, -2, 6, 0.2, Math.PI - 0.2, false);
+      graphics.stroke();
+    } else if (state === 'dead') {
+      // X eyes and frown
+      graphics.lineStyle(2, 0x000000);
+      graphics.lineBetween(-8, -8, -4, -4);
+      graphics.lineBetween(-4, -8, -8, -4);
+      graphics.lineBetween(4, -8, 8, -4);
+      graphics.lineBetween(8, -8, 4, -4);
+      graphics.beginPath();
+      graphics.arc(0, 4, 4, Math.PI + 0.3, -0.3, false);
+      graphics.stroke();
+    } else {
+      // Normal smile
+      graphics.lineStyle(2, 0x000000);
+      graphics.beginPath();
+      graphics.arc(0, -2, 4, 0.3, Math.PI - 0.3, false);
+      graphics.stroke();
+    }
+
+    // Feet
+    graphics.fillStyle(COLORS.heroDark);
+    graphics.fillRoundedRect(-TILE_SIZE/3 + 2, TILE_SIZE/4, 10, 8, 3);
+    graphics.fillRoundedRect(TILE_SIZE/3 - 12, TILE_SIZE/4, 10, 8, 3);
   }
 
   updateState(
@@ -230,56 +451,65 @@ class GameScene extends Phaser.Scene {
     isPlaying: boolean,
     onComplete?: () => void
   ) {
-    this.currentState = state;
     this.animationCallback = onComplete;
 
-    // Update hero position
-    if (this.heroSprite) {
+    if (this.heroContainer && this.heroBody) {
       const targetX = state.heroPosition.x * TILE_SIZE + TILE_SIZE / 2;
       const targetY = state.heroPosition.y * TILE_SIZE + TILE_SIZE / 2;
 
       if (isPlaying) {
-        // Animate movement
+        // Stop idle animation during movement
+        this.tweens.killTweensOf(this.heroContainer);
+
         this.tweens.add({
-          targets: this.heroSprite,
+          targets: this.heroContainer,
           x: targetX,
           y: targetY,
           duration: 200,
           ease: 'Power2',
           onComplete: () => {
+            // Resume idle animation
+            this.tweens.add({
+              targets: this.heroContainer,
+              y: { from: targetY - 2, to: targetY + 2 },
+              duration: 600,
+              yoyo: true,
+              repeat: -1,
+              ease: 'Sine.easeInOut',
+            });
             this.animationCallback?.();
           },
         });
       } else {
-        // Instant move
-        this.heroSprite.setPosition(targetX, targetY);
+        this.heroContainer.setPosition(targetX, targetY);
       }
 
-      // Update hero color based on alive/won status
+      // Update hero appearance
       if (!state.isAlive) {
-        this.heroSprite.setFillStyle(0xef4444);
+        this.drawHeroGraphics(this.heroBody, 'dead');
       } else if (state.hasWon) {
-        this.heroSprite.setFillStyle(0x22c55e);
+        this.drawHeroGraphics(this.heroBody, 'won');
       } else {
-        this.heroSprite.setFillStyle(COLORS.hero);
+        this.drawHeroGraphics(this.heroBody, 'normal');
       }
     }
 
-    // Update collected coins (hide them)
-    for (const [key, sprite] of this.coinSprites) {
-      sprite.setVisible(!state.collectedCoins.has(key));
+    // Update coins
+    for (const [key, container] of this.coinSprites) {
+      const visible = !state.collectedCoins.has(key);
+      container.setVisible(visible);
     }
 
-    // Update hazard states based on current turn
+    // Update hazards
     for (let i = 0; i < this.levelData.hazards.length; i++) {
       const hazard = this.levelData.hazards[i];
       const key = posKey(hazard);
-      const sprite = this.hazardSprites.get(key);
+      const container = this.hazardSprites.get(key);
 
-      if (sprite) {
+      if (container) {
+        const spikes = container.getData('spikes') as Phaser.GameObjects.Graphics;
         const isActive = this.isHazardActive(hazard, state.currentTurn);
-        sprite.setFillStyle(isActive ? COLORS.hazardActive : COLORS.hazardInactive);
-        sprite.setAlpha(isActive ? 1 : 0.5);
+        this.drawSpikes(spikes, isActive);
       }
     }
   }

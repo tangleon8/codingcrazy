@@ -18,3 +18,4 @@ class Level(Base):
 
     # Relationships
     progress: Mapped[list["Progress"]] = relationship("Progress", back_populates="level")
+    quest: Mapped["Quest"] = relationship("Quest", back_populates="level", uselist=False)
