@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, levels, progress
+from app.routers import auth, levels, progress, quests, characters, progression, dev
 
 
 app = FastAPI(
@@ -26,6 +26,10 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api")
 app.include_router(levels.router, prefix="/api")
 app.include_router(progress.router, prefix="/api")
+app.include_router(quests.router, prefix="/api")
+app.include_router(characters.router, prefix="/api")
+app.include_router(progression.router, prefix="/api")
+app.include_router(dev.router, prefix="/api")
 
 
 @app.get("/health")

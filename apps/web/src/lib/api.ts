@@ -126,6 +126,134 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  // Quest Map endpoints
+  async getQuestMap() {
+    return this.request<QuestMapResponse>('/api/quests/map');
+  }
+
+  async getQuestDetail(questId: number) {
+    return this.request<QuestDetailResponse>(`/api/quests/${questId}`);
+  }
+
+  async completeQuest(questId: number, actionCount: number, coinsCollected: number = 0) {
+    return this.request<CompleteQuestResponse>('/api/quests/complete', {
+      method: 'POST',
+      body: JSON.stringify({
+        quest_id: questId,
+        action_count: actionCount,
+        coins_collected: coinsCollected,
+      }),
+    });
+  }
+
+  // Progression endpoints
+  async getProgression() {
+    return this.request<PlayerProgression>('/api/progression/me');
+  }
+
+  // Character endpoints
+  async getCharacters() {
+    return this.request<Character[]>('/api/characters');
+  }
+
+  async selectCharacter(characterId: number) {
+    return this.request<{ success: boolean; selected_character_id: number }>(
+      '/api/characters/select',
+      {
+        method: 'POST',
+        body: JSON.stringify({ character_id: characterId }),
+      }
+    );
+  }
+
+  async purchaseCharacter(characterId: number) {
+    return this.request<{ success: boolean; remaining_coins: number }>(
+      '/api/characters/purchase',
+      {
+        method: 'POST',
+        body: JSON.stringify({ character_id: characterId }),
+      }
+    );
+  }
+
+  // Dev endpoints
+  async resetProgress() {
+    return this.request<{ success: boolean; message: string }>(
+      '/api/dev/reset-progress',
+      { method: 'POST' }
+    );
+  }
+}
+
+// Quest Map Types
+export interface QuestNode {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  difficulty: string;
+  xp_reward: number;
+  coin_reward: number;
+  node_x: number;
+  node_y: number;
+  level_requirement: number;
+  prerequisite_quests: number[];
+  level_id: number | null;
+}
+
+export interface QuestMapItem {
+  quest: QuestNode;
+  status: 'locked' | 'unlocked' | 'completed';
+  stars_earned: number;
+  attempts: number;
+  is_playable: boolean;
+}
+
+export interface QuestMapResponse {
+  quests: QuestMapItem[];
+  connections: [number, number][];
+}
+
+export interface QuestDetailResponse {
+  quest: QuestNode;
+  status: string;
+  stars_earned: number;
+  best_action_count: number | null;
+  attempts: number;
+  completed_at: string | null;
+  level_slug: string | null;
+}
+
+export interface PlayerProgression {
+  player_level: number;
+  current_xp: number;
+  xp_to_next_level: number;
+  coins: number;
+  selected_character_id: number | null;
+}
+
+export interface Character {
+  id: number;
+  name: string;
+  display_name: string;
+  description: string | null;
+  sprite_key: string;
+  level_required: number;
+  quests_required: number[];
+  coin_cost: number;
+  is_unlocked: boolean;
+  is_selected: boolean;
+  unlock_reason: string | null;
+}
+
+export interface CompleteQuestResponse {
+  success: boolean;
+  stars_earned: number;
+  xp_gained: number;
+  coins_gained: number;
+  leveled_up: boolean;
+  new_level: number | null;
 }
 
 // Types
