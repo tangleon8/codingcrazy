@@ -23,16 +23,15 @@ class Settings(BaseSettings):
     COOKIE_MAX_AGE: int = 60 * 60 * 24 * 7  # 7 days in seconds
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
 
     class Config:
         env_file = ".env"
         case_sensitive = True
 
 
-@lru_cache
 def get_settings() -> Settings:
     return Settings()
 
 
-settings = get_settings()
+settings = Settings()
