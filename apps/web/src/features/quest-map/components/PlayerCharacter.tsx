@@ -1,6 +1,6 @@
 'use client';
 
-import { useProgression } from '@/lib/progression-context';
+import { useEffect, useState } from 'react';
 
 interface PlayerCharacterProps {
   x: number;
@@ -8,32 +8,29 @@ interface PlayerCharacterProps {
 }
 
 export default function PlayerCharacter({ x, y }: PlayerCharacterProps) {
-  const { selectedCharacter } = useProgression();
+  const [frame, setFrame] = useState(0);
 
-  // Character sprite mapping
-  const characterSprites: Record<string, { emoji: string; color: string }> = {
-    knight: { emoji: '🛡️', color: '#3B82F6' },
-    wizard: { emoji: '🧙', color: '#8B5CF6' },
-    ninja: { emoji: '🥷', color: '#1F2937' },
-    robot: { emoji: '🤖', color: '#6B7280' },
-    astronaut: { emoji: '🚀', color: '#06B6D4' },
-    dragon: { emoji: '🐉', color: '#22C55E' },
-    pirate: { emoji: '🏴‍☠️', color: '#F59E0B' },
-    alien: { emoji: '👽', color: '#A855F7' },
-  };
+  // Animate the sprite (4 frames in the idle animation)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame((f) => (f + 1) % 4);
+    }, 200); // Change frame every 200ms
 
-  const sprite = selectedCharacter
-    ? characterSprites[selectedCharacter.sprite_key] || { emoji: '🧙', color: '#8B5CF6' }
-    : { emoji: '🧙', color: '#8B5CF6' };
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sprite sheet is 4 frames wide, each frame is ~64px
+  const FRAME_WIDTH = 64;
+  const FRAME_HEIGHT = 64;
 
   return (
     <div
       className="absolute pointer-events-none transition-all duration-500 ease-out"
       style={{
-        left: x - 30,
-        top: y - 60,
-        width: 60,
-        height: 70,
+        left: x - 40,
+        top: y - 70,
+        width: 80,
+        height: 90,
         zIndex: 25,
       }}
     >
@@ -41,55 +38,55 @@ export default function PlayerCharacter({ x, y }: PlayerCharacterProps) {
       <div
         className="absolute bottom-0 left-1/2 transform -translate-x-1/2"
         style={{
-          width: 40,
-          height: 12,
-          background: 'radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%)',
+          width: 50,
+          height: 15,
+          background: 'radial-gradient(ellipse, rgba(0,0,0,0.4) 0%, transparent 70%)',
           borderRadius: '50%',
         }}
       />
 
-      {/* Character glow */}
+      {/* Character glow ring */}
       <div
-        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
+        className="absolute left-1/2 bottom-4 transform -translate-x-1/2"
         style={{
           width: 60,
-          height: 60,
-          background: `radial-gradient(circle, ${sprite.color}40 0%, transparent 70%)`,
+          height: 20,
+          background: 'radial-gradient(ellipse, rgba(255,215,0,0.4) 0%, transparent 70%)',
+          borderRadius: '50%',
           animation: 'pulse 2s ease-in-out infinite',
         }}
       />
 
-      {/* Character sprite */}
+      {/* Character sprite from tileset */}
       <div
-        className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center"
+        className="absolute left-1/2 transform -translate-x-1/2"
         style={{
-          top: 5,
-          width: 50,
-          height: 50,
-          background: `linear-gradient(180deg, ${sprite.color}CC 0%, ${sprite.color}99 100%)`,
-          borderRadius: '50%',
-          border: `3px solid ${sprite.color}`,
-          boxShadow: `0 4px 12px rgba(0,0,0,0.4), 0 0 20px ${sprite.color}60`,
+          top: 0,
+          width: FRAME_WIDTH,
+          height: FRAME_HEIGHT,
+          backgroundImage: 'url(/assets/dungeon/forest/Character/Idle/Idle-Sheet.png)',
+          backgroundPosition: `-${frame * FRAME_WIDTH}px 0`,
+          backgroundSize: `${FRAME_WIDTH * 4}px ${FRAME_HEIGHT}px`,
+          imageRendering: 'pixelated',
+          filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))',
+          transform: 'translateX(-50%) scale(1.2)',
         }}
-      >
-        <span className="text-2xl" style={{ filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.5))' }}>
-          {sprite.emoji}
-        </span>
-      </div>
+      />
 
-      {/* Floating indicator */}
+      {/* Floating "YOU" indicator */}
       <div
-        className="absolute -top-4 left-1/2 transform -translate-x-1/2"
+        className="absolute -top-6 left-1/2 transform -translate-x-1/2"
         style={{
           animation: 'bounce 1s ease-in-out infinite',
         }}
       >
         <div
-          className="px-2 py-0.5 rounded text-xs font-bold"
+          className="px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap"
           style={{
             background: 'linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%)',
             color: '#7C2D12',
             boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            border: '1px solid #FCD34D',
           }}
         >
           YOU

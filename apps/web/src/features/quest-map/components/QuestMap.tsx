@@ -5,6 +5,7 @@ import { QuestMapItem } from '@/lib/api';
 import QuestMarker from './QuestMarker';
 import QuestPopup from './QuestPopup';
 import PlayerCharacter from './PlayerCharacter';
+import Image from 'next/image';
 
 interface QuestMapProps {
   quests: QuestMapItem[];
@@ -13,37 +14,27 @@ interface QuestMapProps {
   onSelectQuest: (questId: number | null) => void;
 }
 
-// Decorative elements for the dungeon
+// Forest decorations positioned around the map
 const DECORATIONS = {
-  crystals: [
-    { x: 80, y: 850, size: 1.2, color: '#22D3EE' },
-    { x: 120, y: 870, size: 0.8, color: '#06B6D4' },
-    { x: 60, y: 880, size: 1.0, color: '#67E8F9' },
-    { x: 900, y: 200, size: 1.1, color: '#A78BFA' },
-    { x: 930, y: 230, size: 0.7, color: '#8B5CF6' },
+  trees: [
+    { x: 50, y: 100, type: 'green' },
+    { x: 900, y: 80, type: 'dark' },
+    { x: 80, y: 400, type: 'golden' },
+    { x: 920, y: 450, type: 'red' },
+    { x: 30, y: 700, type: 'green' },
+    { x: 950, y: 750, type: 'dark' },
+    { x: 100, y: 900, type: 'golden' },
+    { x: 880, y: 920, type: 'green' },
   ],
-  torches: [
-    { x: 50, y: 150 },
-    { x: 950, y: 150 },
-    { x: 50, y: 400 },
-    { x: 950, y: 400 },
-    { x: 50, y: 650 },
-    { x: 950, y: 650 },
-    { x: 50, y: 900 },
-    { x: 950, y: 900 },
+  mushrooms: [
+    { x: 200, y: 850 },
+    { x: 750, y: 300 },
+    { x: 450, y: 600 },
   ],
-  skulls: [
-    { x: 150, y: 920 },
-    { x: 820, y: 180 },
-    { x: 350, y: 300 },
-  ],
-  chests: [
-    { x: 700, y: 600 },
-    { x: 200, y: 400 },
-  ],
-  rails: [
-    { x1: 100, y1: 800, x2: 300, y2: 750 },
-    { x1: 600, y1: 400, x2: 800, y2: 350 },
+  rocks: [
+    { x: 300, y: 150 },
+    { x: 700, y: 800 },
+    { x: 150, y: 550 },
   ],
 };
 
@@ -63,7 +54,7 @@ export default function QuestMap({
   const MAP_WIDTH = 1000;
   const MAP_HEIGHT = 1000;
 
-  // Find player's current position (first unlocked or last completed quest)
+  // Find player's current position
   const getPlayerPosition = () => {
     const currentQuest = quests.find(q => q.status === 'unlocked')
       || quests.filter(q => q.status === 'completed').pop()
@@ -133,12 +124,21 @@ export default function QuestMap({
   const questMap = new Map(quests.map((q) => [q.quest.id, q]));
   const completedCount = quests.filter((q) => q.status === 'completed').length;
 
+  // Tree image mapping
+  const treeImages: Record<string, string> = {
+    green: '/assets/dungeon/forest/Trees/Green-Tree.png',
+    dark: '/assets/dungeon/forest/Trees/Dark-Tree.png',
+    golden: '/assets/dungeon/forest/Trees/Golden-Tree.png',
+    red: '/assets/dungeon/forest/Trees/Red-Tree.png',
+    yellow: '/assets/dungeon/forest/Trees/Yellow-Tree.png',
+  };
+
   return (
     <div
       ref={containerRef}
       className="w-full h-full overflow-hidden relative"
       style={{
-        background: '#0a0605',
+        background: 'linear-gradient(180deg, #87CEEB 0%, #98D8C8 30%, #228B22 60%, #1a472a 100%)',
         cursor: isDragging ? 'grabbing' : 'grab',
       }}
       onMouseDown={handleMouseDown}
@@ -147,27 +147,37 @@ export default function QuestMap({
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
     >
+      {/* Sky background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/assets/dungeon/forest/Background/Background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+        }}
+      />
+
       {/* World Title Banner */}
       <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-30">
         <div className="relative">
           <div
             className="px-8 py-2 rounded-md shadow-2xl"
             style={{
-              background: 'linear-gradient(180deg, #8B0000 0%, #5c0000 50%, #3d0000 100%)',
-              border: '3px solid #DAA520',
+              background: 'linear-gradient(180deg, #2D5016 0%, #1a3a0c 50%, #0f2506 100%)',
+              border: '3px solid #8B7355',
               boxShadow: '0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
             }}
           >
             <h1
               className="text-xl font-bold text-center tracking-wider"
               style={{
-                color: '#FFD700',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3)',
+                color: '#90EE90',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(144,238,144,0.3)',
               }}
             >
-              KITHGARD DUNGEON
+              HIGH FOREST
             </h1>
-            <div className="text-center text-amber-200 text-sm font-medium">
+            <div className="text-center text-green-200 text-sm font-medium">
               {completedCount} / {quests.length}
             </div>
           </div>
@@ -186,168 +196,46 @@ export default function QuestMap({
           height: MAP_HEIGHT,
         }}
       >
-        {/* Dungeon Background */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000">
+        {/* Ground/Grass Base using tileset */}
+        <div
+          className="absolute inset-0 rounded-3xl overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(ellipse at 30% 20%, rgba(34, 139, 34, 0.8) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(34, 139, 34, 0.6) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, rgba(85, 107, 47, 0.9) 0%, transparent 70%),
+              linear-gradient(180deg, #3a5f2c 0%, #2d4a23 50%, #1e351a 100%)
+            `,
+            boxShadow: 'inset 0 0 100px rgba(0,0,0,0.5)',
+          }}
+        />
+
+        {/* Ground texture pattern overlay */}
+        <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none rounded-3xl overflow-hidden">
           <defs>
-            {/* Stone texture pattern */}
-            <pattern id="stone-pattern" width="50" height="50" patternUnits="userSpaceOnUse">
-              <rect width="50" height="50" fill="#1a1410" />
-              <rect x="0" y="0" width="24" height="24" fill="#1f1915" stroke="#0d0a08" strokeWidth="1" />
-              <rect x="25" y="0" width="24" height="24" fill="#181210" stroke="#0d0a08" strokeWidth="1" />
-              <rect x="0" y="25" width="24" height="24" fill="#151010" stroke="#0d0a08" strokeWidth="1" />
-              <rect x="25" y="25" width="24" height="24" fill="#1c1612" stroke="#0d0a08" strokeWidth="1" />
+            <pattern id="grass-pattern" width="32" height="32" patternUnits="userSpaceOnUse">
+              <rect width="32" height="32" fill="transparent" />
+              <circle cx="8" cy="8" r="1" fill="#228B22" />
+              <circle cx="24" cy="8" r="1.5" fill="#32CD32" />
+              <circle cx="16" cy="20" r="1" fill="#228B22" />
+              <circle cx="4" cy="28" r="1" fill="#32CD32" />
+              <circle cx="28" cy="24" r="1.5" fill="#228B22" />
             </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grass-pattern)" />
+        </svg>
 
-            {/* Ambient light gradients */}
-            <radialGradient id="torch-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FF6600" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#FF6600" stopOpacity="0" />
-            </radialGradient>
-
-            <radialGradient id="crystal-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
-            </radialGradient>
-
-            {/* Path glow filter */}
+        {/* Dirt paths connecting quests */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 2 }}>
+          <defs>
             <filter id="path-glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
               <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
           </defs>
-
-          {/* Base stone floor */}
-          <rect width="1000" height="1000" fill="url(#stone-pattern)" rx="20" />
-
-          {/* Dark vignette overlay */}
-          <rect width="1000" height="1000" fill="url(#vignette)" rx="20" opacity="0.8" />
-          <defs>
-            <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
-              <stop offset="0%" stopColor="transparent" />
-              <stop offset="100%" stopColor="#000000" />
-            </radialGradient>
-          </defs>
-
-          {/* Cave walls/borders */}
-          <path
-            d="M 0 200 Q 30 150, 0 100 L 0 0 L 150 0 Q 100 50, 120 100 Q 80 150, 100 200 Z"
-            fill="#0d0805"
-          />
-          <path
-            d="M 1000 200 Q 970 150, 1000 100 L 1000 0 L 850 0 Q 900 50, 880 100 Q 920 150, 900 200 Z"
-            fill="#0d0805"
-          />
-
-          {/* Ground details - rocks */}
-          <ellipse cx="150" cy="950" rx="80" ry="30" fill="#1a1410" />
-          <ellipse cx="850" cy="80" rx="60" ry="25" fill="#1a1410" />
-          <ellipse cx="500" cy="500" rx="100" ry="40" fill="#151010" opacity="0.5" />
-
-          {/* Mine cart rails */}
-          {DECORATIONS.rails.map((rail, i) => (
-            <g key={`rail-${i}`}>
-              <line
-                x1={rail.x1}
-                y1={rail.y1}
-                x2={rail.x2}
-                y2={rail.y2}
-                stroke="#4a3525"
-                strokeWidth="8"
-              />
-              <line
-                x1={rail.x1}
-                y1={rail.y1 + 12}
-                x2={rail.x2}
-                y2={rail.y2 + 12}
-                stroke="#4a3525"
-                strokeWidth="8"
-              />
-              {/* Rail ties */}
-              {[0, 0.25, 0.5, 0.75, 1].map((t, j) => {
-                const x = rail.x1 + (rail.x2 - rail.x1) * t;
-                const y = rail.y1 + (rail.y2 - rail.y1) * t;
-                return (
-                  <rect
-                    key={j}
-                    x={x - 15}
-                    y={y - 2}
-                    width="30"
-                    height="20"
-                    fill="#3d2817"
-                    transform={`rotate(${Math.atan2(rail.y2 - rail.y1, rail.x2 - rail.x1) * 180 / Math.PI} ${x} ${y + 6})`}
-                  />
-                );
-              })}
-            </g>
-          ))}
-
-          {/* Crystals */}
-          {DECORATIONS.crystals.map((crystal, i) => (
-            <g key={`crystal-${i}`} transform={`translate(${crystal.x}, ${crystal.y}) scale(${crystal.size})`}>
-              <circle cx="0" cy="0" r="30" fill={crystal.color} opacity="0.2" />
-              <polygon
-                points="-8,15 0,-20 8,15"
-                fill={crystal.color}
-                opacity="0.9"
-              />
-              <polygon
-                points="-12,18 -5,-10 2,18"
-                fill={crystal.color}
-                opacity="0.7"
-              />
-              <polygon
-                points="3,12 10,-15 17,12"
-                fill={crystal.color}
-                opacity="0.8"
-              />
-            </g>
-          ))}
-
-          {/* Treasure chests */}
-          {DECORATIONS.chests.map((chest, i) => (
-            <g key={`chest-${i}`} transform={`translate(${chest.x}, ${chest.y})`}>
-              <rect x="-15" y="-10" width="30" height="20" fill="#8B4513" rx="2" />
-              <rect x="-15" y="-10" width="30" height="8" fill="#A0522D" rx="2" />
-              <rect x="-2" y="-6" width="4" height="8" fill="#FFD700" rx="1" />
-              <ellipse cx="0" cy="10" rx="18" ry="4" fill="rgba(0,0,0,0.3)" />
-            </g>
-          ))}
-
-          {/* Skulls */}
-          {DECORATIONS.skulls.map((skull, i) => (
-            <text
-              key={`skull-${i}`}
-              x={skull.x}
-              y={skull.y}
-              fontSize="24"
-              opacity="0.6"
-            >
-              💀
-            </text>
-          ))}
-        </svg>
-
-        {/* Torch elements (on top of SVG) */}
-        {DECORATIONS.torches.map((torch, i) => (
-          <div
-            key={`torch-${i}`}
-            className="absolute text-2xl"
-            style={{
-              left: torch.x,
-              top: torch.y,
-              animation: `pulse ${2 + (i * 0.2)}s ease-in-out infinite`,
-              filter: 'drop-shadow(0 0 15px #ff6600)',
-            }}
-          >
-            🔥
-          </div>
-        ))}
-
-        {/* Connection paths */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 5 }}>
           {connections.map(([fromId, toId], idx) => {
             const from = questMap.get(fromId);
             const to = questMap.get(toId);
@@ -364,29 +252,96 @@ export default function QuestMap({
 
             return (
               <g key={idx}>
+                {/* Path shadow */}
+                <path
+                  d={`M ${from.quest.node_x} ${from.quest.node_y} Q ${cx} ${midY} ${to.quest.node_x} ${to.quest.node_y}`}
+                  fill="none"
+                  stroke="rgba(0,0,0,0.3)"
+                  strokeWidth="18"
+                  strokeLinecap="round"
+                />
+                {/* Dirt path */}
+                <path
+                  d={`M ${from.quest.node_x} ${from.quest.node_y} Q ${cx} ${midY} ${to.quest.node_x} ${to.quest.node_y}`}
+                  fill="none"
+                  stroke={isCompleted ? '#8B7355' : '#5D4E37'}
+                  strokeWidth="14"
+                  strokeLinecap="round"
+                />
+                {/* Path highlight for completed */}
                 {isCompleted && (
                   <path
                     d={`M ${from.quest.node_x} ${from.quest.node_y} Q ${cx} ${midY} ${to.quest.node_x} ${to.quest.node_y}`}
                     fill="none"
-                    stroke="#F59E0B"
-                    strokeWidth="12"
-                    opacity="0.3"
-                    filter="url(#path-glow)"
+                    stroke="#DAA520"
+                    strokeWidth="4"
+                    strokeDasharray="8 12"
+                    opacity="0.6"
+                    strokeLinecap="round"
                   />
                 )}
-                <path
-                  d={`M ${from.quest.node_x} ${from.quest.node_y} Q ${cx} ${midY} ${to.quest.node_x} ${to.quest.node_y}`}
-                  fill="none"
-                  stroke={isCompleted ? '#F59E0B' : '#3d2817'}
-                  strokeWidth="4"
-                  strokeDasharray={isCompleted ? 'none' : '12 8'}
-                  opacity={isCompleted ? 0.9 : 0.4}
-                  strokeLinecap="round"
-                />
               </g>
             );
           })}
         </svg>
+
+        {/* Trees from tileset */}
+        {DECORATIONS.trees.map((tree, i) => (
+          <div
+            key={`tree-${i}`}
+            className="absolute pointer-events-none"
+            style={{
+              left: tree.x - 60,
+              top: tree.y - 100,
+              width: 120,
+              height: 150,
+              zIndex: 3,
+            }}
+          >
+            <Image
+              src={treeImages[tree.type]}
+              alt="tree"
+              width={120}
+              height={150}
+              style={{
+                objectFit: 'contain',
+                filter: 'drop-shadow(4px 4px 8px rgba(0,0,0,0.4))',
+              }}
+            />
+          </div>
+        ))}
+
+        {/* Mushroom decorations */}
+        {DECORATIONS.mushrooms.map((pos, i) => (
+          <div
+            key={`mushroom-${i}`}
+            className="absolute text-3xl pointer-events-none"
+            style={{
+              left: pos.x,
+              top: pos.y,
+              zIndex: 3,
+              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+            }}
+          >
+            🍄
+          </div>
+        ))}
+
+        {/* Rock decorations */}
+        {DECORATIONS.rocks.map((pos, i) => (
+          <div
+            key={`rock-${i}`}
+            className="absolute text-2xl pointer-events-none"
+            style={{
+              left: pos.x,
+              top: pos.y,
+              zIndex: 3,
+              filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))',
+            }}
+          >
+            🪨
+          </div>
+        ))}
 
         {/* Quest Markers */}
         {quests.map((item) => (
@@ -418,13 +373,13 @@ export default function QuestMap({
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-20">
         <button
           onClick={() => setScale(s => Math.min(1.5, s * 1.15))}
-          className="w-10 h-10 bg-gradient-to-b from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-amber-100 rounded-lg border-2 border-amber-500 text-xl font-bold shadow-lg transition-all"
+          className="w-10 h-10 bg-gradient-to-b from-green-700 to-green-900 hover:from-green-600 hover:to-green-800 text-green-100 rounded-lg border-2 border-green-500 text-xl font-bold shadow-lg transition-all"
         >
           +
         </button>
         <button
           onClick={() => setScale(s => Math.max(0.3, s * 0.85))}
-          className="w-10 h-10 bg-gradient-to-b from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-amber-100 rounded-lg border-2 border-amber-500 text-xl font-bold shadow-lg transition-all"
+          className="w-10 h-10 bg-gradient-to-b from-green-700 to-green-900 hover:from-green-600 hover:to-green-800 text-green-100 rounded-lg border-2 border-green-500 text-xl font-bold shadow-lg transition-all"
         >
           −
         </button>
@@ -439,7 +394,7 @@ export default function QuestMap({
               });
             }
           }}
-          className="w-10 h-10 bg-gradient-to-b from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 text-amber-100 rounded-lg border-2 border-amber-500 text-sm font-bold shadow-lg transition-all"
+          className="w-10 h-10 bg-gradient-to-b from-green-700 to-green-900 hover:from-green-600 hover:to-green-800 text-green-100 rounded-lg border-2 border-green-500 text-sm font-bold shadow-lg transition-all"
           title="Center on current quest"
         >
           ⌖
@@ -447,7 +402,7 @@ export default function QuestMap({
       </div>
 
       {/* Help hint */}
-      <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-amber-200/80 text-xs z-20">
+      <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-green-200/80 text-xs z-20">
         Drag to pan • Scroll to zoom • Click a marker to play
       </div>
     </div>
