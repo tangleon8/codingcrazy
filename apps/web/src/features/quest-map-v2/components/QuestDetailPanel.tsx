@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { QuestWithStatus } from '../hooks/useQuestProgress';
+import { LEVEL_1_QUESTS } from '../data/level1Quests';
 
 interface QuestDetailPanelProps {
   quest: QuestWithStatus | null;
@@ -19,21 +20,24 @@ export default function QuestDetailPanel({
   if (!quest) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-        <div className="text-4xl mb-4">🗺️</div>
+        <div className="text-5xl mb-4">🗺️</div>
         <h3 className="text-lg font-semibold text-gray-300 mb-2">Select a Quest</h3>
-        <p className="text-sm text-gray-500">
-          Click on any quest node on the map to see its details
+        <p className="text-sm text-gray-500 leading-relaxed">
+          Click on any quest node on the map to see its details and start your adventure!
         </p>
       </div>
     );
   }
 
-  const { status, starsEarned, difficulty } = quest;
+  const { status, starsEarned, difficulty, id } = quest;
 
-  const difficultyColors: Record<string, { bg: string; text: string }> = {
-    easy: { bg: '#16A34A', text: '#DCFCE7' },
-    medium: { bg: '#CA8A04', text: '#FEF9C3' },
-    hard: { bg: '#DC2626', text: '#FEE2E2' },
+  // Get previous quest title for locked message
+  const prevQuest = LEVEL_1_QUESTS.find(q => q.id === id - 1);
+
+  const difficultyColors: Record<string, { bg: string; text: string; border: string }> = {
+    easy: { bg: '#166534', text: '#DCFCE7', border: '#22C55E' },
+    medium: { bg: '#A16207', text: '#FEF9C3', border: '#EAB308' },
+    hard: { bg: '#B91C1C', text: '#FEE2E2', border: '#EF4444' },
   };
 
   const diffColor = difficultyColors[difficulty] || difficultyColors.easy;
@@ -52,8 +56,12 @@ export default function QuestDetailPanel({
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2">
           <span
-            className="px-2 py-0.5 rounded text-xs font-bold uppercase"
-            style={{ backgroundColor: diffColor.bg, color: diffColor.text }}
+            className="px-2.5 py-1 rounded text-xs font-bold uppercase"
+            style={{
+              backgroundColor: diffColor.bg,
+              color: diffColor.text,
+              border: `1px solid ${diffColor.border}`,
+            }}
           >
             {difficulty}
           </span>
@@ -93,6 +101,35 @@ export default function QuestDetailPanel({
         <p className="text-sm text-gray-300 leading-relaxed">{quest.description}</p>
       </div>
 
+      {/* How This Works - for unlocked quests */}
+      {status === 'unlocked' && (
+        <div
+          className="rounded-lg p-3 mb-4"
+          style={{
+            background: 'linear-gradient(180deg, #1E3A5F 0%, #172554 100%)',
+            border: '2px solid #3B82F6',
+          }}
+        >
+          <h3 className="text-xs font-bold text-blue-400 mb-2 uppercase flex items-center gap-1.5">
+            <span>💡</span> How this works
+          </h3>
+          <ul className="text-xs text-blue-200 space-y-1.5">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Write code to move your hero</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Collect coins for bonus stars</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Reach the goal to complete</span>
+            </li>
+          </ul>
+        </div>
+      )}
+
       {/* Rewards */}
       <div
         className="rounded-lg p-3 mb-4"
@@ -119,6 +156,12 @@ export default function QuestDetailPanel({
             </div>
           </div>
         </div>
+        {/* Progression hint for unlocked */}
+        {status === 'unlocked' && (
+          <p className="text-xs text-amber-200/60 text-center mt-3 pt-2 border-t border-amber-900/50">
+            Completing unlocks the next quest!
+          </p>
+        )}
       </div>
 
       {/* Stars (for completed quests) */}
@@ -150,6 +193,37 @@ export default function QuestDetailPanel({
         </div>
       )}
 
+      {/* Locked quest info */}
+      {status === 'locked' && prevQuest && (
+        <div
+          className="rounded-lg p-4 mb-4 text-center"
+          style={{
+            background: 'linear-gradient(180deg, rgba(75, 85, 99, 0.3) 0%, rgba(55, 65, 81, 0.3) 100%)',
+            border: '2px dashed #4B5563',
+          }}
+        >
+          <div className="text-3xl mb-2">🔒</div>
+          <h4 className="text-sm font-semibold text-gray-300 mb-1">
+            Quest Locked
+          </h4>
+          <p className="text-xs text-gray-500 mb-3">
+            Complete the previous quest to unlock
+          </p>
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg"
+            style={{
+              background: 'rgba(0, 0, 0, 0.3)',
+              border: '1px solid #4B5563',
+            }}
+          >
+            <span className="text-sm">📋</span>
+            <span className="text-xs text-gray-400">
+              Finish: <span className="text-gray-300 font-medium">{prevQuest.title}</span>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Spacer */}
       <div className="flex-1" />
 
@@ -159,7 +233,7 @@ export default function QuestDetailPanel({
           <>
             <button
               onClick={handleStart}
-              className="w-full py-3 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
+              className="w-full py-3.5 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
               style={{
                 background: 'linear-gradient(180deg, #22C55E 0%, #16A34A 100%)',
                 boxShadow: '0 4px 0 #15803D, 0 6px 12px rgba(0,0,0,0.2)',
@@ -170,7 +244,7 @@ export default function QuestDetailPanel({
             </button>
             <button
               onClick={handleMockComplete}
-              className="w-full py-2 rounded-lg font-medium text-gray-300 transition-all hover:bg-gray-700"
+              className="w-full py-2 rounded-lg font-medium text-gray-400 transition-all hover:bg-gray-700 hover:text-gray-300"
               style={{
                 background: '#374151',
                 border: '1px solid #4B5563',
@@ -184,7 +258,7 @@ export default function QuestDetailPanel({
         {status === 'completed' && (
           <button
             onClick={handleStart}
-            className="w-full py-3 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
+            className="w-full py-3.5 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
             style={{
               background: 'linear-gradient(180deg, #3B82F6 0%, #2563EB 100%)',
               boxShadow: '0 4px 0 #1D4ED8, 0 6px 12px rgba(0,0,0,0.2)',
@@ -207,13 +281,6 @@ export default function QuestDetailPanel({
           </div>
         )}
       </div>
-
-      {/* Unlock hint for locked quests */}
-      {status === 'locked' && (
-        <p className="text-xs text-gray-500 text-center mt-2">
-          Complete the previous quest to unlock this one
-        </p>
-      )}
     </div>
   );
 }

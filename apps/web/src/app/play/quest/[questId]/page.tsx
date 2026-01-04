@@ -503,9 +503,9 @@ export default function QuestPlayPage() {
       }
 
       // Check if enemy caught player
-      const caughtByEnemy = config.enemyStart &&
+      const caughtByEnemy = !!(config.enemyStart &&
                             newEnemyPos.x === newPlayerPos.x &&
-                            newEnemyPos.y === newPlayerPos.y;
+                            newEnemyPos.y === newPlayerPos.y);
 
       currentState = {
         ...currentState,

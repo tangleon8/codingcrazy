@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useProgression } from '@/lib/progression-context';
 import { useQuestProgress } from '@/features/quest-map-v2/hooks/useQuestProgress';
+import { useTutorial } from '@/features/quest-map-v2/hooks/useTutorial';
 import {
   QuestMapLevel1,
   QuestDetailPanel,
   PlayerHUDSimple,
+  TutorialOverlay,
 } from '@/features/quest-map-v2/components';
 
 export default function QuestsPage() {
@@ -26,6 +28,15 @@ export default function QuestsPage() {
     setStars,
     resetProgress,
   } = useQuestProgress();
+
+  const {
+    showTutorial,
+    currentStep,
+    totalSteps,
+    currentStepData,
+    nextStep,
+    dismiss: dismissTutorial,
+  } = useTutorial();
 
   const [selectedQuestId, setSelectedQuestId] = useState<number | null>(null);
 
@@ -105,6 +116,17 @@ export default function QuestsPage() {
           />
         </div>
       </div>
+
+      {/* Tutorial Overlay */}
+      {showTutorial && currentStepData && (
+        <TutorialOverlay
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          stepData={currentStepData}
+          onNext={nextStep}
+          onDismiss={dismissTutorial}
+        />
+      )}
     </div>
   );
 }
