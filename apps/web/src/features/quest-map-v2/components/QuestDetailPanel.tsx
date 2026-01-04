@@ -39,7 +39,7 @@ export default function QuestDetailPanel({
   const diffColor = difficultyColors[difficulty] || difficultyColors.easy;
 
   const handleStart = () => {
-    router.push(`/play/${quest.slug}`);
+    router.push(`/play/quest/${quest.id}`);
   };
 
   const handleMockComplete = () => {
