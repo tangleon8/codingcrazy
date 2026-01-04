@@ -7,9 +7,35 @@ from app.core.config import settings
 from app.core.security import decode_access_token
 from app.models.user import User
 
+# DEV MODE: Skip authentication during development
+DEV_MODE = True
+
+
+def get_or_create_dev_user(db: Session) -> User:
+    """Get or create dev user for DEV_MODE"""
+    dev_user = db.query(User).filter(User.id == 1).first()
+    if not dev_user:
+        dev_user = db.query(User).first()
+    if not dev_user:
+        # Create dev user if none exists
+        from app.core.security import get_password_hash
+        dev_user = User(
+            email="dev@test.com",
+            password_hash=get_password_hash("dev"),
+            is_admin=True,
+        )
+        db.add(dev_user)
+        db.commit()
+        db.refresh(dev_user)
+    return dev_user
+
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     """Get current user from session cookie"""
+    # DEV MODE: Return dev user without auth
+    if DEV_MODE:
+        return get_or_create_dev_user(db)
+
     token = request.cookies.get(settings.COOKIE_NAME)
     if not token:
         raise HTTPException(

@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     COOKIE_MAX_AGE: int = 60 * 60 * 24 * 7  # 7 days in seconds
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004", "http://localhost:3005"]
 
     class Config:
         env_file = ".env"

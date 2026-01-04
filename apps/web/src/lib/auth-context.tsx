@@ -3,6 +3,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api, User } from './api';
 
+// DEV MODE: Skip authentication during development
+const DEV_MODE = true;
+const DEV_USER: User = {
+  id: 1,
+  email: 'dev@test.com',
+  is_admin: true,
+  created_at: new Date().toISOString(),
+};
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -16,10 +25,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(DEV_MODE ? DEV_USER : null);
+  const [isLoading, setIsLoading] = useState(!DEV_MODE);
 
   const refreshUser = useCallback(async () => {
+    if (DEV_MODE) {
+      setUser(DEV_USER);
+      return;
+    }
     try {
       const user = await api.getCurrentUser();
       setUser(user);
@@ -29,6 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (DEV_MODE) {
+      setIsLoading(false);
+      return;
+    }
     refreshUser().finally(() => setIsLoading(false));
   }, [refreshUser]);
 
