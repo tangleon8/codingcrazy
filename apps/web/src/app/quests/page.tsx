@@ -76,7 +76,7 @@ export default function QuestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col">
+    <div className="h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col overflow-hidden">
       {/* Navigation */}
       <nav className="border-b border-gray-700 bg-gray-900/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,12 +137,14 @@ export default function QuestsPage() {
             <div className="text-white text-xl">Loading quest map...</div>
           </div>
         ) : mapData ? (
-          <QuestMap
-            quests={mapData.quests}
-            connections={mapData.connections}
-            selectedQuestId={selectedQuestId}
-            onSelectQuest={setSelectedQuestId}
-          />
+          <div className="flex-1 w-full h-full">
+            <QuestMap
+              quests={mapData.quests}
+              connections={mapData.connections}
+              selectedQuestId={selectedQuestId}
+              onSelectQuest={setSelectedQuestId}
+            />
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-gray-400">No quest data available</div>

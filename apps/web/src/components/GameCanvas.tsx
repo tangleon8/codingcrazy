@@ -495,10 +495,10 @@ class GameScene extends Phaser.Scene {
     }
 
     // Update coins
-    for (const [key, container] of this.coinSprites) {
+    this.coinSprites.forEach((container, key) => {
       const visible = !state.collectedCoins.has(key);
       container.setVisible(visible);
-    }
+    });
 
     // Update hazards
     for (let i = 0; i < this.levelData.hazards.length; i++) {
