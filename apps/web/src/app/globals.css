@@ -219,3 +219,21 @@
   from { background-position-x: 0; }
   to { background-position-x: -256px; }
 }
+
+/* Forest Quest - Coin float animation */
+@keyframes coinFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Forest Quest - Coin sparkle animation */
+@keyframes coinSparkle {
+  0%, 100% { filter: brightness(1) drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+  50% { filter: brightness(1.25) drop-shadow(0 0 8px #FFD700); }
+}
+
+/* Forest Quest - Goal pulse animation */
+@keyframes goalPulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(144,238,144,0.5), inset 0 0 15px rgba(144,238,144,0.3); }
+  50% { box-shadow: 0 0 25px rgba(144,238,144,0.7), 0 0 35px rgba(144,238,144,0.3), inset 0 0 20px rgba(144,238,144,0.4); }
+}

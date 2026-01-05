@@ -18,6 +18,20 @@ const ASSETS = {
   boarIdle: '/assets/dungeon/forest/Mob/Boar/Idle/Idle-Sheet.png',
   boarRun: '/assets/dungeon/forest/Mob/Boar/Run/Run-Sheet.png',
   tree: '/assets/dungeon/forest/Trees/Green-Tree.png',
+  darkTree: '/assets/dungeon/forest/Trees/Dark-Tree.png',
+};
+
+// Forest theme constants
+const FOREST_THEME = {
+  colors: {
+    gridLine: 'rgba(74, 124, 63, 0.12)',
+    vignette: 'rgba(0, 20, 0, 0.6)',
+    lightRay: 'rgba(255, 248, 220, 0.08)',
+    goalGlow: 'rgba(144, 238, 144, 0.6)',
+    goalBorder: '#6B8E23',
+    coinGold: '#FFD700',
+    shadow: 'rgba(0, 0, 0, 0.35)',
+  },
 };
 
 interface Position {
@@ -673,6 +687,22 @@ export default function QuestPlayPage() {
                     boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
                   }}
                 >
+                  {/* Vignette overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none rounded-lg"
+                    style={{
+                      background: `radial-gradient(ellipse at center, transparent 40%, ${FOREST_THEME.colors.vignette} 100%)`,
+                      zIndex: 1,
+                    }}
+                  />
+                  {/* Subtle light rays from top */}
+                  <div
+                    className="absolute inset-0 pointer-events-none rounded-lg"
+                    style={{
+                      background: `linear-gradient(180deg, ${FOREST_THEME.colors.lightRay} 0%, transparent 40%)`,
+                      zIndex: 1,
+                    }}
+                  />
               {/* Grid */}
               <div
                 className="relative"
@@ -680,13 +710,13 @@ export default function QuestPlayPage() {
                   width: GRID_SIZE * CELL_SIZE,
                   height: GRID_SIZE * CELL_SIZE,
                   backgroundImage: `
-                    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                    linear-gradient(${FOREST_THEME.colors.gridLine} 1px, transparent 1px),
+                    linear-gradient(90deg, ${FOREST_THEME.colors.gridLine} 1px, transparent 1px)
                   `,
                   backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
                 }}
               >
-                {/* Goal */}
+                {/* Goal - Forest Shrine */}
                 {gameState && (
                   <div
                     className="absolute rounded-lg transition-all duration-300"
@@ -695,18 +725,30 @@ export default function QuestPlayPage() {
                       top: gameState.goal.y * CELL_SIZE,
                       width: CELL_SIZE,
                       height: CELL_SIZE,
-                      backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                      border: '3px solid #22C55E',
-                      boxShadow: '0 0 20px rgba(34, 197, 94, 0.5)',
+                      background: `
+                        radial-gradient(ellipse at center, ${FOREST_THEME.colors.goalGlow} 0%, transparent 70%),
+                        linear-gradient(180deg, #5D4E37 0%, #3D2E1F 100%)
+                      `,
+                      border: `3px solid ${FOREST_THEME.colors.goalBorder}`,
+                      boxShadow: `0 0 20px ${FOREST_THEME.colors.goalGlow}, inset 0 0 15px rgba(144,238,144,0.3)`,
+                      animation: 'goalPulse 2s ease-in-out infinite',
                     }}
                   >
-                    <div className="w-full h-full flex items-center justify-center text-2xl">
-                      🏁
+                    {/* Inner glow ring */}
+                    <div
+                      className="absolute inset-2 rounded"
+                      style={{
+                        border: '2px solid rgba(144,238,144,0.5)',
+                        background: 'radial-gradient(ellipse at center, rgba(144,238,144,0.2) 0%, transparent 60%)',
+                      }}
+                    />
+                    <div className="w-full h-full flex items-center justify-center text-2xl relative z-10">
+                      <span style={{ filter: 'drop-shadow(0 0 6px rgba(144,238,144,0.8))' }}>&#9733;</span>
                     </div>
                   </div>
                 )}
 
-                {/* Obstacles (Trees) */}
+                {/* Obstacles (Trees) with shadows */}
                 {gameState?.obstacles.map((obs, i) => (
                   <div
                     key={`obs-${i}`}
@@ -718,23 +760,35 @@ export default function QuestPlayPage() {
                       height: CELL_SIZE + 16,
                     }}
                   >
+                    {/* Shadow under tree */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: '10%',
+                        width: '80%',
+                        height: 10,
+                        background: `radial-gradient(ellipse, ${FOREST_THEME.colors.shadow} 0%, transparent 70%)`,
+                        borderRadius: '50%',
+                      }}
+                    />
                     <img
-                      src={ASSETS.tree}
+                      src={i % 3 === 0 ? ASSETS.darkTree : ASSETS.tree}
                       alt="Tree"
-                      className="w-full h-full object-contain"
-                      style={{ imageRendering: 'pixelated' }}
+                      className="w-full h-full object-contain relative"
+                      style={{ imageRendering: 'pixelated', zIndex: 1 }}
                     />
                   </div>
                 ))}
 
-                {/* Coins */}
+                {/* Coins with float and sparkle */}
                 {gameState?.coins.map((coin, i) => {
                   const key = `${coin.x},${coin.y}`;
                   if (gameState.collectedCoins.has(key)) return null;
                   return (
                     <div
                       key={`coin-${i}`}
-                      className="absolute flex items-center justify-center animate-bounce"
+                      className="absolute flex items-center justify-center"
                       style={{
                         left: coin.x * CELL_SIZE,
                         top: coin.y * CELL_SIZE,
@@ -742,7 +796,24 @@ export default function QuestPlayPage() {
                         height: CELL_SIZE,
                       }}
                     >
-                      <span className="text-3xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+                      {/* Coin shadow */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: 8,
+                          width: 24,
+                          height: 6,
+                          background: `radial-gradient(ellipse, ${FOREST_THEME.colors.shadow} 0%, transparent 70%)`,
+                          borderRadius: '50%',
+                        }}
+                      />
+                      <span
+                        className="text-3xl"
+                        style={{
+                          animation: 'coinFloat 2s ease-in-out infinite, coinSparkle 1.5s ease-in-out infinite',
+                          animationDelay: `${i * 0.3}s`,
+                        }}
+                      >
                         🪙
                       </span>
                     </div>
@@ -774,7 +845,7 @@ export default function QuestPlayPage() {
                   </div>
                 )}
 
-                {/* Player */}
+                {/* Player with shadow */}
                 {gameState && (
                   <div
                     className="absolute transition-all duration-400"
@@ -786,14 +857,28 @@ export default function QuestPlayPage() {
                       zIndex: 10,
                     }}
                   >
+                    {/* Player shadow */}
                     <div
-                      className="w-full h-full"
+                      style={{
+                        position: 'absolute',
+                        bottom: 4,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 40,
+                        height: 10,
+                        background: `radial-gradient(ellipse, ${FOREST_THEME.colors.shadow} 0%, transparent 70%)`,
+                        borderRadius: '50%',
+                      }}
+                    />
+                    <div
+                      className="w-full h-full relative"
                       style={{
                         backgroundImage: `url(${isRunning ? ASSETS.playerRun : ASSETS.playerIdle})`,
                         backgroundSize: `${CELL_SIZE * 4}px ${CELL_SIZE}px`,
                         backgroundPosition: '0 0',
                         imageRendering: 'pixelated',
                         animation: isRunning ? 'playerRun 0.4s steps(4) infinite' : 'playerIdle 0.8s steps(4) infinite',
+                        zIndex: 1,
                       }}
                     />
                   </div>
@@ -878,6 +963,24 @@ export default function QuestPlayPage() {
               )}
               </div>
               </div>
+            </div>
+
+            {/* Mini Legend */}
+            <div
+              className="flex items-center justify-center gap-6 mt-3 px-4 py-2 rounded-lg"
+              style={{
+                background: 'linear-gradient(180deg, rgba(45, 90, 39, 0.4) 0%, rgba(29, 60, 25, 0.5) 100%)',
+                border: '1px solid rgba(107, 142, 35, 0.3)',
+              }}
+            >
+              <div className="flex items-center gap-2 text-sm">
+                <span>🪙</span>
+                <span style={{ color: '#DAA520' }}>Collect coins</span>
+              </div>
+              <div className="w-px h-4 bg-green-800/50" />
+              <div className="flex items-center gap-2 text-sm">
+                <span style={{ filter: 'drop-shadow(0 0 4px rgba(144,238,144,0.6))' }}>&#9733;</span>
+                <span style={{ color: '#90EE90' }}>Reach the goal</span>
               </div>
             </div>
 
