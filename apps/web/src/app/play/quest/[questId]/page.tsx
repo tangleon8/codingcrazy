@@ -1104,24 +1104,40 @@ export default function QuestPlayPage() {
 
               <div className="relative bg-gradient-to-br from-[#1a1510] to-[#0f0d0a] rounded-xl border border-amber-900/30 overflow-hidden">
                 {/* Header */}
-                <div className="px-5 py-3 bg-gradient-to-r from-amber-900/30 to-orange-900/20 border-b border-amber-800/30 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                    <span className="text-lg">📜</span>
+                <div className="px-5 py-3 bg-gradient-to-r from-amber-900/30 to-orange-900/20 border-b border-amber-800/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                      <span className="text-lg">📜</span>
+                    </div>
+                    <span className="text-amber-200 font-semibold">Quest Instructions</span>
                   </div>
-                  <span className="text-amber-200 font-semibold">Quest Instructions</span>
+                  <span className="text-xs text-amber-600/60 uppercase tracking-wider">Read carefully</span>
                 </div>
 
-                {/* Content */}
-                <div className="p-5">
+                {/* Content - scrollable */}
+                <div className="p-5 max-h-[320px] overflow-y-auto custom-scrollbar">
                   <div
-                    className="prose prose-invert prose-sm max-w-none"
+                    className="prose prose-invert prose-sm max-w-none space-y-3"
                     dangerouslySetInnerHTML={{
                       __html: config.instructions
-                        .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text text-transparent mb-4">$1</h2>')
+                        // Main title (# Header)
+                        .replace(/^# (.+)$/gm, '<h2 class="text-xl font-bold text-amber-200 mb-2 pb-2 border-b border-amber-900/30">$1</h2>')
+                        // Section headers (## Header)
+                        .replace(/^## (.+)$/gm, '<h3 class="text-sm font-bold text-amber-400 uppercase tracking-wide mt-4 mb-2 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>$1</h3>')
+                        // Code blocks (```)
+                        .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-900/80 rounded-lg p-3 my-2 border border-gray-700/50 overflow-x-auto"><code class="text-emerald-400 font-mono text-xs leading-relaxed">$1</code></pre>')
+                        // Bold text
                         .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-amber-100 font-semibold">$1</strong>')
-                        .replace(/`([^`]+)`/g, '<code class="bg-gray-900/80 px-2 py-1 rounded-md text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code>')
-                        .replace(/- `([^`]+)`/g, '<div class="flex items-center gap-2 my-1.5"><span class="text-amber-500">→</span><code class="bg-gray-900/80 px-2 py-1 rounded-md text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code></div>')
-                        .replace(/\n\n/g, '</p><p class="mb-3 text-gray-300 leading-relaxed">')
+                        // Inline code
+                        .replace(/`([^`]+)`/g, '<code class="bg-gray-900/80 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code>')
+                        // Numbered lists
+                        .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-3 my-1.5"><span class="flex-shrink-0 w-5 h-5 bg-amber-900/40 rounded-full flex items-center justify-center text-xs text-amber-400 font-bold">$1</span><span class="text-gray-300">$2</span></div>')
+                        // Bullet lists with code
+                        .replace(/^- `([^`]+)` (.+)$/gm, '<div class="flex items-start gap-2 my-1.5 pl-1"><span class="text-amber-500 mt-0.5">→</span><code class="bg-gray-900/80 px-1.5 py-0.5 rounded text-emerald-400 font-mono text-xs border border-gray-700/50">$1</code><span class="text-gray-400">$2</span></div>')
+                        // Regular bullet lists
+                        .replace(/^- (.+)$/gm, '<div class="flex items-start gap-2 my-1.5 pl-1"><span class="text-amber-500 mt-1">•</span><span class="text-gray-300">$1</span></div>')
+                        // Paragraphs
+                        .replace(/\n\n/g, '</p><p class="text-gray-300 leading-relaxed">')
                         .replace(/\n/g, '<br>')
                     }}
                   />
@@ -1130,25 +1146,28 @@ export default function QuestPlayPage() {
             </div>
 
             {/* Code Editor */}
-            <div className="flex-1 min-h-[250px] relative group">
+            <div className="flex-1 min-h-[220px] relative group">
               {/* Glow effect */}
               <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-500 blur-sm" />
 
               <div className="h-full relative bg-[#0a0f14] rounded-xl border border-emerald-900/30 overflow-hidden shadow-2xl shadow-black/30">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-[#0f1a1a] to-[#0a1414] px-4 py-3 border-b border-emerald-900/30 flex items-center justify-between">
+                <div className="bg-gradient-to-r from-[#0f1a1a] to-[#0a1414] px-4 py-2.5 border-b border-emerald-900/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-800/50 rounded-md border border-gray-700/50">
-                      <span className="text-emerald-400 text-sm">📄</span>
-                      <span className="text-sm text-gray-300 font-mono">main.js</span>
+                    <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-900/30 rounded-md border border-emerald-700/30">
+                      <span className="text-emerald-400 text-xs">{'</>'}</span>
+                      <span className="text-xs text-emerald-300 font-mono">Code Editor</span>
                     </div>
                   </div>
-                  <span className="text-xs text-gray-500 italic">Write your commands here</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-600">Type your code below</span>
+                    <span className="text-xs px-2 py-0.5 bg-gray-800/50 rounded text-gray-500 font-mono">JavaScript</span>
+                  </div>
                 </div>
                 {/* Line numbers + Editor */}
                 <div className="flex h-[calc(100%-48px)]">
@@ -1217,13 +1236,13 @@ export default function QuestPlayPage() {
               <button
                 onClick={runCode}
                 disabled={isRunning}
-                className="group relative flex-1 py-3.5 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+                className="group relative flex-1 py-4 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
                 style={{
                   background: 'linear-gradient(180deg, #22C55E 0%, #16A34A 100%)',
                   boxShadow: '0 4px 0 #15803D, 0 8px 20px rgba(34, 197, 94, 0.3)',
                 }}
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
                   {isRunning ? (
                     <>
                       <span className="animate-spin">⏳</span>
@@ -1231,7 +1250,7 @@ export default function QuestPlayPage() {
                     </>
                   ) : (
                     <>
-                      <span className="text-lg">▶</span>
+                      <span className="text-xl">▶</span>
                       Run Code
                     </>
                   )}
@@ -1240,7 +1259,7 @@ export default function QuestPlayPage() {
               </button>
               <button
                 onClick={initGame}
-                className="group relative py-3.5 px-6 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative py-4 px-5 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   background: 'linear-gradient(180deg, #4B5563 0%, #374151 100%)',
                   boxShadow: '0 4px 0 #1F2937, 0 8px 20px rgba(0, 0, 0, 0.2)',
@@ -1252,23 +1271,26 @@ export default function QuestPlayPage() {
                 </span>
                 <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
-              {gameState?.isWon && (
-                <button
-                  onClick={handleComplete}
-                  className="group relative py-3.5 px-6 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-pulse"
-                  style={{
-                    background: 'linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)',
-                    boxShadow: '0 4px 0 #6D28D9, 0 8px 20px rgba(139, 92, 246, 0.4)',
-                  }}
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    <span className="text-lg">✓</span>
-                    Complete Quest
-                  </span>
-                  <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-              )}
             </div>
+
+            {/* Complete Quest Button - Shows when won */}
+            {gameState?.isWon && (
+              <button
+                onClick={handleComplete}
+                className="group relative w-full py-4 rounded-xl font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)',
+                  boxShadow: '0 4px 0 #6D28D9, 0 8px 20px rgba(139, 92, 246, 0.4)',
+                  animation: 'pulse 2s ease-in-out infinite',
+                }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
+                  <span className="text-xl">🎉</span>
+                  Complete Quest & Claim Rewards!
+                </span>
+                <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            )}
           </div>
         </div>
       </main>
