@@ -66,79 +66,135 @@ const QUEST_CONFIGS: Record<number, {
   allowedCommands: Command[];
 }> = {
   1: {
-    playerStart: { x: 1, y: 6 },
+    playerStart: { x: 1, y: 4 },
     enemyStart: null,
-    goal: { x: 6, y: 1 },
-    obstacles: [
-      { x: 3, y: 3 }, { x: 3, y: 4 }, { x: 4, y: 3 },
-    ],
-    coins: [{ x: 2, y: 4 }, { x: 5, y: 2 }],
-    instructions: `# First Steps
+    goal: { x: 5, y: 4 },
+    obstacles: [],
+    coins: [{ x: 3, y: 4 }],
+    instructions: `# Your First Code
 
-Welcome, young adventurer! 🧙‍♂️
+**Welcome to coding!** You're about to write real code.
 
-Your hero needs to reach the **green goal** tile.
+## What is Code?
+Code is a set of **instructions** that tell the computer (or hero!) what to do. Each instruction runs **one at a time**, from top to bottom.
 
-Use these commands:
-- \`hero.moveRight()\` - Move right
-- \`hero.moveUp()\` - Move up
+## Your Mission
+Move your hero → to the glowing goal ⭐
 
-**Tip:** Commands run in order, one after another!
+## The Command
+Type this in the code editor:
+\`\`\`
+hero.moveRight()
+\`\`\`
 
-Get to the goal to complete the quest!`,
-    starterCode: `// Move your hero to the goal!
-// Use hero.moveRight() and hero.moveUp()
+This tells your hero to take **one step right**.
 
-hero.moveRight();
-hero.moveRight();
+## How to Play
+1. Type the command in the editor
+2. Click the **▶ Run Code** button
+3. Watch your hero move!
+
+## Challenge
+The goal is **4 steps** to the right. Can you figure out how many \`hero.moveRight()\` commands you need?
+
+**Hint:** Each command = one step. You need 4 commands!`,
+    starterCode: `// Welcome! This is the CODE EDITOR
+// Lines starting with // are "comments" - they don't run
+
+// Type your commands below this line:
+hero.moveRight()
+
+// Need more moves? Add them below!
+// Remember: the goal is 4 steps away
+
 `,
     allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
   },
   2: {
     playerStart: { x: 0, y: 4 },
     enemyStart: null,
-    goal: { x: 7, y: 4 },
+    goal: { x: 4, y: 4 },
     obstacles: [
-      { x: 2, y: 3 }, { x: 2, y: 4 }, { x: 2, y: 5 },
-      { x: 5, y: 3 }, { x: 5, y: 4 }, { x: 5, y: 5 },
+      { x: 2, y: 4 },
     ],
-    coins: [{ x: 3, y: 2 }, { x: 4, y: 6 }, { x: 6, y: 4 }],
-    instructions: `# Moving Forward
+    coins: [{ x: 2, y: 3 }, { x: 3, y: 4 }],
+    instructions: `# New Directions
 
-The path is blocked! You need to go around obstacles.
+**Great job on Quest 1!** Now let's learn more commands.
 
-Use:
-- \`hero.moveRight()\`
-- \`hero.moveUp()\`
-- \`hero.moveDown()\`
+## New Commands
+You can move in **4 directions**:
+- \`hero.moveRight()\` → Move right
+- \`hero.moveLeft()\` ← Move left
+- \`hero.moveUp()\` ↑ Move up
+- \`hero.moveDown()\` ↓ Move down
 
-Plan your path around the trees!`,
-    starterCode: `// Navigate around the obstacles!
+## The Problem
+There's a **tree** blocking your path! You can't walk through trees.
 
-hero.moveRight();
-hero.moveUp();
+## The Solution
+Go **around** the obstacle:
+1. Move right once
+2. Move **up** to go around the tree
+3. Move right to pass the tree
+4. Move **down** to get back on track
+5. Move right to reach the goal
+
+## Key Concept: Sequences
+Code runs **line by line**, top to bottom. The order matters!
+
+\`\`\`
+hero.moveRight()  // runs first
+hero.moveUp()     // runs second
+hero.moveRight()  // runs third
+\`\`\``,
+    starterCode: `// Time to go around the tree!
+// The tree is blocking the direct path
+
+hero.moveRight()
+hero.moveUp()
+
+// Add more commands to get around the tree
+// and reach the goal!
+
 `,
     allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
   },
   3: {
-    playerStart: { x: 1, y: 1 },
-    enemyStart: { x: 6, y: 6 },
-    goal: { x: 7, y: 0 },
-    obstacles: [
-      { x: 3, y: 0 }, { x: 3, y: 1 }, { x: 3, y: 2 },
-    ],
-    coins: [{ x: 2, y: 1 }, { x: 5, y: 0 }, { x: 4, y: 3 }],
-    instructions: `# Watch Out!
+    playerStart: { x: 1, y: 4 },
+    enemyStart: { x: 6, y: 4 },
+    goal: { x: 1, y: 1 },
+    obstacles: [],
+    coins: [{ x: 1, y: 2 }, { x: 1, y: 3 }],
+    instructions: `# Danger! The Boar
 
-A wild boar appeared! 🐗
+**Watch out!** A wild boar has appeared! 🐗
 
-The boar will chase you each turn. Reach the goal before it catches you!
+## How the Boar Works
+- The boar **chases you** every turn
+- After YOU move, the boar moves ONE step toward you
+- If the boar catches you, you lose!
 
-Move quickly and plan ahead!`,
-    starterCode: `// Escape the boar and reach the goal!
+## Your Strategy
+The goal is **above you** (up), not to the right.
 
-hero.moveRight();
-hero.moveRight();
+The boar starts far away on the right. If you move **up** toward the goal, you'll reach it before the boar catches you!
+
+## Counting Turns
+You need **3 moves up** to reach the goal.
+The boar needs **5+ moves** to reach you.
+
+You have time - but don't waste moves!
+
+## Tip
+Think about the **shortest path** to the goal. Extra moves give the boar more time to catch you!`,
+    starterCode: `// The boar is coming! Run to the goal!
+// The goal is UP - go straight up!
+
+hero.moveUp()
+
+// Add 2 more moveUp() commands to reach the goal
+
 `,
     allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
   },

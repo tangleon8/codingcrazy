@@ -75,7 +75,8 @@ export default function TutorialOverlay({
             {/* Skip button */}
             <button
               onClick={onDismiss}
-              className="text-green-300 hover:text-white transition-colors text-sm"
+              className="text-green-300 hover:text-white transition-colors text-sm cursor-pointer"
+              style={{ position: 'relative', zIndex: 10 }}
             >
               Skip
             </button>
@@ -132,11 +133,13 @@ export default function TutorialOverlay({
           >
             <button
               onClick={onNext}
-              className="w-full py-3 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98]"
+              className="w-full py-3 rounded-lg font-bold text-white transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer"
               style={{
                 background: 'linear-gradient(180deg, #22C55E 0%, #16A34A 100%)',
                 boxShadow: '0 4px 0 #15803D, 0 6px 12px rgba(0,0,0,0.3)',
                 border: '2px solid #4ADE80',
+                position: 'relative',
+                zIndex: 10,
               }}
             >
               {isLastStep ? "Got it! Let's Go!" : 'Next'}
