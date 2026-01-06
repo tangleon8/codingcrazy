@@ -99,8 +99,8 @@ function WorldContent() {
       )}
 
       {/* World Map Area */}
-      <div className="absolute inset-0 pt-16">
-        {worldState && (
+      <div className="absolute top-16 left-0 right-0 bottom-0 bg-gray-900">
+        {worldState ? (
           <GameMap
             zone={worldState.zone}
             playerPosition={worldState.player.position}
@@ -112,6 +112,10 @@ function WorldContent() {
               movePlayer(x, y);
             }}
           />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-white text-xl">Loading map...</div>
+          </div>
         )}
       </div>
 
