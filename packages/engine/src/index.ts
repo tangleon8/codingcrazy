@@ -6,7 +6,24 @@
  * - Action parsing and validation
  * - Game state simulation
  * - Win condition checking
+ * - Combat mechanics
+ * - Inventory management
+ * - World state management
  */
 
-export * from './types';
+// Export all types from the new types module
+export * from './types/index';
+
+// Legacy export - keep backward compatibility with existing code
 export * from './simulator';
+
+// Re-export commonly used types at top level for convenience
+export type {
+  Position,
+  Direction,
+  Action,
+  ActionType,
+  GameState,
+  SimulationResult,
+  ExecutionResult,
+} from './types/index';

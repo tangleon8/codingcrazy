@@ -1,14 +1,14 @@
 /**
- * Core types for the game engine
+ * Legacy types for backward compatibility
+ *
+ * This file maintains the original type definitions for existing level-based gameplay.
+ * New RPG features should use the types from './types/index.ts'
  */
 
-export interface Position {
-  x: number;
-  y: number;
-}
+// Re-export common utilities from new types
+export { Position, Direction, posKey, parseKey } from './types/common';
 
-export type Direction = 'up' | 'down' | 'left' | 'right';
-
+// Legacy action types (only move and wait for puzzle levels)
 export type ActionType = 'move' | 'wait';
 
 export interface Action {
@@ -16,13 +16,17 @@ export interface Action {
   direction?: Direction;
 }
 
+// Import Direction type for the interface
+import type { Direction } from './types/common';
+
+// Legacy level data structure (for puzzle levels)
 export interface LevelData {
   gridWidth: number;
   gridHeight: number;
-  startPosition: Position;
-  goals: Position[];
-  walls: Position[];
-  coins: Position[];
+  startPosition: import('./types/common').Position;
+  goals: import('./types/common').Position[];
+  walls: import('./types/common').Position[];
+  coins: import('./types/common').Position[];
   hazards: Hazard[];
   allowedMethods: string[];
   instructions: string;
@@ -43,8 +47,9 @@ export interface WinConditions {
   collectAllCoins: boolean;
 }
 
+// Legacy game state (for puzzle levels)
 export interface GameState {
-  heroPosition: Position;
+  heroPosition: import('./types/common').Position;
   collectedCoins: Set<string>;
   currentTurn: number;
   isAlive: boolean;
@@ -67,15 +72,4 @@ export interface ExecutionResult {
   actions: Action[];
   error?: string;
   consoleOutput: string[];
-}
-
-// Utility to create position key for Set/Map
-export function posKey(pos: Position): string {
-  return `${pos.x},${pos.y}`;
-}
-
-// Parse position key back to Position
-export function parseKey(key: string): Position {
-  const [x, y] = key.split(',').map(Number);
-  return { x, y };
 }
