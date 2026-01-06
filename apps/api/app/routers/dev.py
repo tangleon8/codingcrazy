@@ -1,63 +1,73 @@
 from fastapi import APIRouter
 
 from app.core.deps import DbSession, CurrentUser
-from app.models.quest import Quest
-from app.models.quest_progress import QuestProgress
+from app.models import Progress, ChestProgress, PlayerInventory
 
 
 router = APIRouter(prefix="/dev", tags=["dev"])
 
 
-@router.post("/unlock-all-quests")
-def unlock_all_quests(db: DbSession):
-    """Unlock all quests by removing level requirements and prerequisites"""
-    quests = db.query(Quest).all()
-    for quest in quests:
-        quest.level_requirement = 1
-        quest.prerequisite_quests = []
-    db.commit()
-    return {"success": True, "message": f"Unlocked {len(quests)} quests"}
-
-
-@router.post("/link-quests-to-levels")
-def link_quests_to_levels(db: DbSession):
-    """Link quests to their corresponding levels by matching names"""
-    from app.models.level import Level
-
-    # Map quest slugs to level slugs
-    quest_level_map = {
-        "quest-first-steps": "first-steps",
-        "quest-turning-corners": "turning-corners",
-        "quest-coin-hunter": "coin-collector",
-        "quest-loop-master": "loop-the-loop",
-        "quest-danger-zone": "danger-zone",
-    }
-
-    levels = {l.slug: l.id for l in db.query(Level).all()}
-    linked = 0
-
-    for quest_slug, level_slug in quest_level_map.items():
-        quest = db.query(Quest).filter(Quest.slug == quest_slug).first()
-        if quest and level_slug in levels:
-            quest.level_id = levels[level_slug]
-            linked += 1
-
-    db.commit()
-    return {"success": True, "message": f"Linked {linked} quests to levels"}
-
-
 @router.post("/reset-progress")
 def reset_user_progress(db: DbSession, current_user: CurrentUser):
     """Reset all progress for current user (dev only)"""
-    # Reset quest progress
-    db.query(QuestProgress).filter(QuestProgress.user_id == current_user.id).delete()
+    # Reset level progress
+    db.query(Progress).filter(Progress.user_id == current_user.id).delete()
 
-    # Reset player progression
+    # Reset chest progress
+    db.query(ChestProgress).filter(ChestProgress.user_id == current_user.id).delete()
+
+    # Reset inventory
+    db.query(PlayerInventory).filter(PlayerInventory.user_id == current_user.id).delete()
+
+    # Reset player stats to starting values
     current_user.player_level = 1
     current_user.current_xp = 0
-    current_user.coins = 0
+    current_user.coins = 50  # Starting gold
+    current_user.hp = 100
+    current_user.max_hp = 100
+    current_user.mp = 30
+    current_user.max_mp = 30
+    current_user.attack = 10
+    current_user.defense = 5
+    current_user.speed = 5
+    current_user.crit_chance = 0.05
+    current_user.world_x = 25
+    current_user.world_y = 25
+    current_user.current_zone_id = None
+    current_user.equipped_weapon_id = None
+    current_user.equipped_head_id = None
+    current_user.equipped_chest_id = None
+    current_user.equipped_legs_id = None
+    current_user.equipped_feet_id = None
+    current_user.equipped_accessory_id = None
     current_user.selected_character_id = None
 
     db.commit()
 
     return {"success": True, "message": "Progress reset"}
+
+
+@router.post("/give-gold")
+def give_gold(amount: int, db: DbSession, current_user: CurrentUser):
+    """Give gold to current user (dev only)"""
+    current_user.coins += amount
+    db.commit()
+    return {"success": True, "new_gold": current_user.coins}
+
+
+@router.post("/set-level")
+def set_level(level: int, db: DbSession, current_user: CurrentUser):
+    """Set player level (dev only)"""
+    current_user.player_level = max(1, level)
+    current_user.current_xp = 0
+    db.commit()
+    return {"success": True, "new_level": current_user.player_level}
+
+
+@router.post("/heal")
+def heal_player(db: DbSession, current_user: CurrentUser):
+    """Fully heal current user (dev only)"""
+    current_user.hp = current_user.max_hp
+    current_user.mp = current_user.max_mp
+    db.commit()
+    return {"success": True, "hp": current_user.hp, "mp": current_user.mp}

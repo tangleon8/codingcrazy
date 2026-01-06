@@ -314,6 +314,13 @@ export interface PlayerWorldState {
   defense: number;
 }
 
+export interface ZoneConnection {
+  target_slug: string;
+  x: number;
+  y: number;
+  required_level: number;
+}
+
 export interface ZoneResponse {
   id: number;
   slug: string;
@@ -325,7 +332,9 @@ export interface ZoneResponse {
   spawn_x: number;
   spawn_y: number;
   level_requirement: number;
-  zone_connections: { target_slug: string; x: number; y: number }[];
+  enemy_level_min: number;
+  enemy_level_max: number;
+  connections: ZoneConnection[];
 }
 
 export interface WorldStateResponse {

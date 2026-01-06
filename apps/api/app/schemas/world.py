@@ -8,11 +8,10 @@ class Position(BaseModel):
 
 
 class ZoneConnection(BaseModel):
-    target_zone_id: int
-    target_zone_slug: str
-    position: Position
-    target_position: Position
-    is_locked: bool = False
+    target_slug: str
+    x: int
+    y: int
+    required_level: int = 1
 
 
 class ZoneResponse(BaseModel):

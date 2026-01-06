@@ -41,7 +41,7 @@ def item_to_info(item: Item, quantity: int, is_equipped: bool) -> ItemInfo:
     )
 
 
-@router.get("/", response_model=InventoryResponse)
+@router.get("", response_model=InventoryResponse)
 def get_inventory(db: DbSession, current_user: CurrentUser):
     """Get player's full inventory"""
     # Get all inventory items

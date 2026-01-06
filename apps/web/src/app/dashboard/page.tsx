@@ -118,7 +118,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quest Map CTA - Main Focus */}
+        {/* World Exploration CTA - Main Focus */}
         <div
           className="rounded-2xl p-8 text-center"
           style={{
@@ -129,13 +129,13 @@ export default function DashboardPage() {
         >
           <div className="text-5xl mb-4">🗺️</div>
           <h2 className="text-3xl font-bold text-white mb-4">
-            Level 1: High Forest
+            Explore the World
           </h2>
           <p className="text-green-200 mb-8 max-w-xl mx-auto text-lg">
-            Explore the forest, complete quests, earn stars, and master the basics of coding!
+            Explore zones, fight enemies, interact with NPCs, and master coding through adventure!
           </p>
           <Link
-            href="/quests"
+            href="/world"
             className="inline-block px-12 py-4 rounded-xl font-bold text-xl text-white transition-all hover:scale-105 hover:brightness-110"
             style={{
               background: 'linear-gradient(180deg, #22C55E 0%, #16A34A 100%)',
@@ -143,7 +143,7 @@ export default function DashboardPage() {
               border: '2px solid #4ADE80',
             }}
           >
-            ▶ Enter Quest Map
+            Enter World
           </Link>
         </div>
 
@@ -156,9 +156,9 @@ export default function DashboardPage() {
               border: '1px solid #374151',
             }}
           >
-            <h3 className="text-lg font-semibold text-white mb-2">💡 Tip</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">Combat</h3>
             <p className="text-sm text-gray-400">
-              Complete quests in order to unlock new challenges. Each quest teaches you something new!
+              Use hero.attack() to fight enemies. Write loops and conditionals to create battle strategies!
             </p>
           </div>
 
@@ -169,9 +169,9 @@ export default function DashboardPage() {
               border: '1px solid #374151',
             }}
           >
-            <h3 className="text-lg font-semibold text-white mb-2">⭐ Stars</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">Exploration</h3>
             <p className="text-sm text-gray-400">
-              Earn up to 3 stars per quest by completing challenges efficiently. Replay to improve!
+              Talk to NPCs, open chests, and defeat enemies to earn XP, gold, and items!
             </p>
           </div>
         </div>
