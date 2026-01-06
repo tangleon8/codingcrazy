@@ -26,11 +26,34 @@ function getStoredProgress(): Map<number, QuestProgress> {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored) as QuestProgress[];
-      return new Map(parsed.map(p => [p.questId, p]));
+      const parsed = JSON.parse(stored);
+      // Handle both array format and old object format
+      if (Array.isArray(parsed)) {
+        return new Map(parsed.map((p: QuestProgress) => [p.questId, p]));
+      }
+      // Old format was {questId: {completed, starsEarned}}
+      if (typeof parsed === 'object') {
+        const entries = Object.entries(parsed).map(([id, data]) => {
+          const questId = parseInt(id);
+          const progress = data as { completed?: boolean; starsEarned?: number; completedAt?: string };
+          return [questId, {
+            questId,
+            completed: progress.completed || false,
+            starsEarned: progress.starsEarned || 0,
+            completedAt: progress.completedAt,
+          }] as [number, QuestProgress];
+        });
+        return new Map(entries);
+      }
     }
   } catch (e) {
     console.error('Failed to load quest progress:', e);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore if we can't clear
+    }
   }
   return new Map();
 }

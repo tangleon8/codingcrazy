@@ -780,20 +780,38 @@ export default function QuestPlayPage() {
     setTimeout(executeNextCommand, 300);
   }, [code, gameState, config]);
 
-  const handleComplete = () => {
-    // Save completion to localStorage and return to quests
-    const stored = localStorage.getItem('questProgress');
-    const progress = stored ? JSON.parse(stored) : {};
+  const handleComplete = async () => {
+    // Calculate stars earned
     const starsEarned = gameState?.collectedCoins.size === config.coins.length ? 3 :
                         gameState && gameState.collectedCoins.size > 0 ? 2 : 1;
 
-    progress[questId] = {
-      completed: true,
-      starsEarned,
-      completedAt: Date.now(),
-    };
+    // Save to the v2 localStorage format
+    const STORAGE_KEY = 'codingcrazy_quest_progress';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const progressArray: Array<{ questId: number; completed: boolean; starsEarned: number; completedAt: string }> =
+        stored ? JSON.parse(stored) : [];
 
-    localStorage.setItem('questProgress', JSON.stringify(progress));
+      // Update or add the quest progress
+      const existingIndex = progressArray.findIndex(p => p.questId === questId);
+      const newProgress = {
+        questId,
+        completed: true,
+        starsEarned: Math.max(starsEarned, existingIndex >= 0 ? progressArray[existingIndex].starsEarned : 0),
+        completedAt: new Date().toISOString(),
+      };
+
+      if (existingIndex >= 0) {
+        progressArray[existingIndex] = newProgress;
+      } else {
+        progressArray.push(newProgress);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progressArray));
+    } catch (e) {
+      console.error('Failed to save quest progress:', e);
+    }
+
     router.push('/quests');
   };
 
@@ -805,13 +823,18 @@ export default function QuestPlayPage() {
     );
   }
 
-  if (!quest) {
+  if (!quest || !QUEST_CONFIGS[questId]) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">Quest not found</div>
-          <Link href="/quests" className="text-blue-400 hover:underline">
-            Back to Quest Map
+          <div className="text-6xl mb-4">🔍</div>
+          <div className="text-red-400 text-xl mb-2">Quest #{questId} not found</div>
+          <p className="text-gray-500 mb-6">This quest doesn&apos;t exist or hasn&apos;t been created yet.</p>
+          <Link
+            href="/quests"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-colors"
+          >
+            <span>←</span> Back to Quest Map
           </Link>
         </div>
       </div>
