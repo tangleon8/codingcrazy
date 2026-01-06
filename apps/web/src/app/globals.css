@@ -256,3 +256,79 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(217, 119, 6, 0.6);
 }
+
+/* ================================================
+   LEVEL 2: CRYSTAL CAVE ANIMATIONS
+   ================================================ */
+
+/* Crystal glow pulse animation */
+@keyframes crystalGlow {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 4px #8B5CF6);
+    opacity: 0.7;
+  }
+  50% {
+    filter: brightness(1.3) drop-shadow(0 0 12px #A78BFA);
+    opacity: 1;
+  }
+}
+
+/* Cave particle float animation */
+@keyframes caveParticle {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-8px) scale(1.1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-12px) scale(1.2);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(-6px) scale(1.05);
+    opacity: 0.4;
+  }
+}
+
+/* Key pickup float and shimmer */
+@keyframes keyFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg);
+    filter: drop-shadow(0 2px 4px rgba(234, 179, 8, 0.4));
+  }
+  50% {
+    transform: translateY(-6px) rotate(5deg);
+    filter: drop-shadow(0 4px 8px rgba(234, 179, 8, 0.6));
+  }
+}
+
+/* Gate locked pulse */
+@keyframes gatePulse {
+  0%, 100% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+  }
+}
+
+/* Gate unlock animation */
+@keyframes gateUnlock {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+}

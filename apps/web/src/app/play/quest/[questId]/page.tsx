@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { LEVEL_1_QUESTS } from '@/features/quest-map-v2/data/level1Quests';
+import { LEVEL_2_QUESTS } from '@/features/quest-map-v2/data/level2Quests';
 
 // Grid settings
 const GRID_SIZE = 8;
@@ -46,6 +47,10 @@ interface GameState {
   obstacles: Position[];
   coins: Position[];
   collectedCoins: Set<string>;
+  keys: Position[];
+  collectedKeys: Set<string>;
+  gates: Position[];
+  openedGates: Set<string>;
   isWon: boolean;
   isLost: boolean;
   turn: number;
@@ -61,6 +66,8 @@ const QUEST_CONFIGS: Record<number, {
   goal: Position;
   obstacles: Position[];
   coins: Position[];
+  keys?: Position[];
+  gates?: Position[];
   instructions: string;
   starterCode: string;
   allowedCommands: Command[];
@@ -375,6 +382,130 @@ hero.moveRight();
 `,
     allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
   },
+
+  // =====================================
+  // LEVEL 2: CRYSTAL CAVE QUESTS (11-13)
+  // =====================================
+  11: {
+    playerStart: { x: 0, y: 4 },
+    enemyStart: null,
+    goal: { x: 7, y: 4 },
+    obstacles: [
+      { x: 3, y: 3 }, { x: 3, y: 4 }, { x: 3, y: 5 },
+    ],
+    coins: [{ x: 2, y: 4 }, { x: 5, y: 4 }],
+    keys: [],
+    gates: [],
+    instructions: `# Welcome to the Crystal Cavern
+
+**You've entered a mysterious underground cave!** Glowing crystals light your path.
+
+## Your Mission
+Navigate through the crystal corridor to reach the exit on the other side.
+
+## What You Know
+You already learned the 4 directions in Level 1:
+- \`hero.moveRight()\` → Move right
+- \`hero.moveLeft()\` ← Move left
+- \`hero.moveUp()\` ↑ Move up
+- \`hero.moveDown()\` ↓ Move down
+
+## The Challenge
+Crystal formations block your direct path. Go **around** them!
+
+**Hint:** Go up, across the top, then down to the goal!`,
+    starterCode: `// Welcome to the Crystal Cavern!
+// Navigate around the crystal formations
+
+hero.moveRight()
+hero.moveRight()
+
+// The crystals block your path at x=3
+// Go up and around them!
+
+`,
+    allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
+  },
+  12: {
+    playerStart: { x: 0, y: 4 },
+    enemyStart: null,
+    goal: { x: 7, y: 4 },
+    obstacles: [
+      { x: 2, y: 2 }, { x: 2, y: 3 }, { x: 2, y: 4 }, { x: 2, y: 5 }, { x: 2, y: 6 },
+    ],
+    coins: [{ x: 1, y: 1 }, { x: 6, y: 4 }],
+    keys: [{ x: 1, y: 7 }],
+    gates: [{ x: 5, y: 4 }],
+    instructions: `# Keys & Gates
+
+**A locked gate blocks your path!** You need a key to open it.
+
+## New Mechanic: Keys 🔑
+- Find the **key** (🔑) in the cave
+- Walk over it to **pick it up**
+- Once you have the key, **all gates open automatically**
+
+## The Puzzle
+1. The gate (🚧) at x=5 blocks your path
+2. The key (🔑) is in the lower-left corner
+3. Get the key first, THEN go to the goal
+
+## Strategy
+You need to go **down** to get the key, then navigate **up and right** to pass through the opened gate.
+
+**Remember:** Plan your full route before coding!`,
+    starterCode: `// A gate blocks your path!
+// First, get the key at the bottom-left
+
+hero.moveDown()
+hero.moveDown()
+hero.moveDown()
+
+// Now get the key and go to the goal!
+
+`,
+    allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
+  },
+  13: {
+    playerStart: { x: 0, y: 0 },
+    enemyStart: { x: 7, y: 7 },
+    goal: { x: 7, y: 0 },
+    obstacles: [
+      { x: 3, y: 0 }, { x: 3, y: 1 }, { x: 3, y: 2 },
+      { x: 5, y: 5 }, { x: 5, y: 6 }, { x: 5, y: 7 },
+    ],
+    coins: [{ x: 2, y: 0 }, { x: 4, y: 3 }, { x: 6, y: 0 }],
+    keys: [{ x: 0, y: 7 }],
+    gates: [{ x: 6, y: 0 }],
+    instructions: `# Cavern Depths
+
+**The deepest part of the cave!** A snail guardian patrols below...
+
+## Double Challenge
+1. **Get the key** (🔑) at the bottom-left
+2. **Avoid the snail** 🐌 - it moves toward you each turn!
+3. **Open the gate** and reach the goal
+
+## The Snail Guardian
+- The snail moves **slower** than the boar (moves every turn but shorter distance)
+- It will chase you, but you can outrun it if you're efficient
+- Plan the **shortest path** to avoid getting caught!
+
+## Strategy
+The snail starts in the bottom-right. If you go down-left for the key quickly, then rush up-right to the goal, you should make it!
+
+**Master Challenge:** Collect all 3 coins for maximum stars!`,
+    starterCode: `// The final cave challenge!
+// Get the key, avoid the snail, reach the goal!
+
+hero.moveDown()
+
+// The key is at the bottom-left corner
+// The snail is watching from bottom-right...
+
+`,
+    allowedCommands: ['moveRight', 'moveUp', 'moveDown', 'moveLeft'],
+  },
 };
 
 // Default config for quests without specific configuration
@@ -397,7 +528,11 @@ export default function QuestPlayPage() {
   const questId = parseInt(params.questId as string);
   const { user, isLoading: authLoading } = useAuth();
 
-  const quest = LEVEL_1_QUESTS.find(q => q.id === questId);
+  // Find quest from either level
+  const isLevel2Quest = questId >= 11 && questId <= 13;
+  const quest = isLevel2Quest
+    ? LEVEL_2_QUESTS.find(q => q.id === questId)
+    : LEVEL_1_QUESTS.find(q => q.id === questId);
   const config = QUEST_CONFIGS[questId] || DEFAULT_CONFIG;
 
   const [code, setCode] = useState(config.starterCode);
@@ -418,6 +553,10 @@ export default function QuestPlayPage() {
       obstacles: [...config.obstacles],
       coins: [...config.coins],
       collectedCoins: new Set(),
+      keys: config.keys ? [...config.keys] : [],
+      collectedKeys: new Set(),
+      gates: config.gates ? [...config.gates] : [],
+      openedGates: new Set(),
       isWon: false,
       isLost: false,
       turn: 0,
@@ -458,6 +597,10 @@ export default function QuestPlayPage() {
       obstacles: [...config.obstacles],
       coins: [...config.coins],
       collectedCoins: new Set(),
+      keys: config.keys ? [...config.keys] : [],
+      collectedKeys: new Set(),
+      gates: config.gates ? [...config.gates] : [],
+      openedGates: new Set(),
       isWon: false,
       isLost: false,
       turn: 0,
@@ -543,10 +686,33 @@ export default function QuestPlayPage() {
         o => o.x === newPlayerPos.x && o.y === newPlayerPos.y
       );
 
-      if (hitObstacle) {
+      // Check gate collision (only if not opened)
+      const hitGate = currentState.gates.some(
+        g => g.x === newPlayerPos.x && g.y === newPlayerPos.y &&
+             !currentState.openedGates.has(`${g.x},${g.y}`)
+      );
+
+      if (hitObstacle || hitGate) {
         newPlayerPos.x = currentState.player.x;
         newPlayerPos.y = currentState.player.y;
-        setConsoleOutput(prev => [...prev, '⚠️ Blocked by obstacle!']);
+        if (hitGate) {
+          setConsoleOutput(prev => [...prev, '🚧 Gate is locked! Find the key first.']);
+        } else {
+          setConsoleOutput(prev => [...prev, '⚠️ Blocked by obstacle!']);
+        }
+      }
+
+      // Check key collection
+      const newCollectedKeys = new Set(currentState.collectedKeys);
+      const newOpenedGates = new Set(currentState.openedGates);
+      const keyKey = `${newPlayerPos.x},${newPlayerPos.y}`;
+      if (currentState.keys.some(k => k.x === newPlayerPos.x && k.y === newPlayerPos.y)) {
+        if (!newCollectedKeys.has(keyKey)) {
+          newCollectedKeys.add(keyKey);
+          setConsoleOutput(prev => [...prev, '🔑 Key collected! Gates are now open.']);
+          // Open all gates when key is collected
+          currentState.gates.forEach(g => newOpenedGates.add(`${g.x},${g.y}`));
+        }
       }
 
       // Check coin collection
@@ -582,11 +748,13 @@ export default function QuestPlayPage() {
         player: newPlayerPos,
         enemy: newEnemyPos,
         collectedCoins: newCollected,
+        collectedKeys: newCollectedKeys,
+        openedGates: newOpenedGates,
         isWon: reachedGoal,
         isLost: caughtByEnemy,
         turn: currentState.turn + 1,
         message: reachedGoal ? '🎉 You reached the goal!' :
-                 caughtByEnemy ? '💀 The boar caught you!' : '',
+                 caughtByEnemy ? '💀 The enemy caught you!' : '',
       };
 
       setGameState(currentState);
@@ -683,7 +851,7 @@ export default function QuestPlayPage() {
                 </div>
                 <div>
                   <span className="text-lg font-bold text-white block leading-tight">{quest.title}</span>
-                  <span className="text-xs text-emerald-400/70">Quest #{quest.id} • Level 1</span>
+                  <span className="text-xs text-emerald-400/70">Quest #{quest.id} • Level {isLevel2Quest ? 2 : 1}</span>
                 </div>
               </div>
             </div>
@@ -872,6 +1040,82 @@ export default function QuestPlayPage() {
                       >
                         🪙
                       </span>
+                    </div>
+                  );
+                })}
+
+                {/* Keys with float animation */}
+                {gameState?.keys.map((keyItem, i) => {
+                  const keyStr = `${keyItem.x},${keyItem.y}`;
+                  if (gameState.collectedKeys.has(keyStr)) return null;
+                  return (
+                    <div
+                      key={`key-${i}`}
+                      className="absolute flex items-center justify-center"
+                      style={{
+                        left: keyItem.x * CELL_SIZE,
+                        top: keyItem.y * CELL_SIZE,
+                        width: CELL_SIZE,
+                        height: CELL_SIZE,
+                      }}
+                    >
+                      {/* Key shadow */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: 8,
+                          width: 28,
+                          height: 8,
+                          background: 'radial-gradient(ellipse, rgba(234, 179, 8, 0.4) 0%, transparent 70%)',
+                          borderRadius: '50%',
+                        }}
+                      />
+                      <span
+                        className="text-3xl"
+                        style={{
+                          animation: 'keyFloat 1.5s ease-in-out infinite',
+                          filter: 'drop-shadow(0 0 8px rgba(234, 179, 8, 0.6))',
+                        }}
+                      >
+                        🔑
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* Gates */}
+                {gameState?.gates.map((gate, i) => {
+                  const gateStr = `${gate.x},${gate.y}`;
+                  const isOpen = gameState.openedGates.has(gateStr);
+                  return (
+                    <div
+                      key={`gate-${i}`}
+                      className="absolute flex items-center justify-center transition-all duration-500"
+                      style={{
+                        left: gate.x * CELL_SIZE,
+                        top: gate.y * CELL_SIZE,
+                        width: CELL_SIZE,
+                        height: CELL_SIZE,
+                        opacity: isOpen ? 0.3 : 1,
+                      }}
+                    >
+                      <div
+                        className="w-14 h-14 rounded-lg flex items-center justify-center"
+                        style={{
+                          background: isOpen
+                            ? 'linear-gradient(180deg, rgba(34, 197, 94, 0.3) 0%, rgba(22, 163, 74, 0.2) 100%)'
+                            : 'linear-gradient(180deg, rgba(239, 68, 68, 0.4) 0%, rgba(185, 28, 28, 0.3) 100%)',
+                          border: isOpen ? '2px solid rgba(34, 197, 94, 0.5)' : '3px solid rgba(239, 68, 68, 0.6)',
+                          boxShadow: isOpen
+                            ? '0 0 10px rgba(34, 197, 94, 0.3)'
+                            : '0 0 15px rgba(239, 68, 68, 0.4)',
+                          animation: isOpen ? 'gateUnlock 0.5s ease-out' : 'gatePulse 2s ease-in-out infinite',
+                        }}
+                      >
+                        <span className="text-2xl">
+                          {isOpen ? '🚪' : '🚧'}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}

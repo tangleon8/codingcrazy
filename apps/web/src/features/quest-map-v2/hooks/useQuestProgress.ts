@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LEVEL_1_QUESTS, Quest } from '../data/level1Quests';
+import { LEVEL_2_QUESTS } from '../data/level2Quests';
 
 const STORAGE_KEY = 'codingcrazy_quest_progress';
 
@@ -45,9 +46,12 @@ function saveProgress(progress: Map<number, QuestProgress>) {
   }
 }
 
-export function useQuestProgress() {
+export function useQuestProgress(level: 1 | 2 = 1) {
   const [progress, setProgress] = useState<Map<number, QuestProgress>>(new Map());
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Select quests based on level
+  const QUESTS = level === 1 ? LEVEL_1_QUESTS : LEVEL_2_QUESTS;
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -57,17 +61,27 @@ export function useQuestProgress() {
 
   // Get status for a quest
   const getQuestStatus = useCallback((questId: number): QuestStatus => {
-    const questIndex = LEVEL_1_QUESTS.findIndex(q => q.id === questId);
+    const questIndex = QUESTS.findIndex(q => q.id === questId);
     if (questIndex === -1) return 'locked';
 
-    // Quest 1 is always unlocked
+    // Level 2 Quest 11 requires Level 1 Quest 10 to be completed
+    if (level === 2 && questIndex === 0) {
+      const level1Complete = progress.get(10)?.completed;
+      if (!level1Complete) {
+        return 'locked';
+      }
+      const questProgress = progress.get(questId);
+      return questProgress?.completed ? 'completed' : 'unlocked';
+    }
+
+    // First quest of level is unlocked (Level 1 Quest 1)
     if (questIndex === 0) {
       const questProgress = progress.get(questId);
       return questProgress?.completed ? 'completed' : 'unlocked';
     }
 
     // Check if previous quest is completed
-    const previousQuest = LEVEL_1_QUESTS[questIndex - 1];
+    const previousQuest = QUESTS[questIndex - 1];
     const previousProgress = progress.get(previousQuest.id);
 
     if (!previousProgress?.completed) {
@@ -76,7 +90,7 @@ export function useQuestProgress() {
 
     const questProgress = progress.get(questId);
     return questProgress?.completed ? 'completed' : 'unlocked';
-  }, [progress]);
+  }, [progress, QUESTS, level]);
 
   // Get stars for a quest
   const getStarsEarned = useCallback((questId: number): number => {
@@ -131,7 +145,7 @@ export function useQuestProgress() {
   }, []);
 
   // Get all quests with their status
-  const questsWithStatus: QuestWithStatus[] = LEVEL_1_QUESTS.map(quest => ({
+  const questsWithStatus: QuestWithStatus[] = QUESTS.map(quest => ({
     ...quest,
     status: getQuestStatus(quest.id),
     starsEarned: getStarsEarned(quest.id),
@@ -139,9 +153,12 @@ export function useQuestProgress() {
 
   // Get completion stats
   const completedCount = questsWithStatus.filter(q => q.status === 'completed').length;
-  const totalCount = LEVEL_1_QUESTS.length;
+  const totalCount = QUESTS.length;
   const totalStars = questsWithStatus.reduce((sum, q) => sum + q.starsEarned, 0);
   const maxStars = totalCount * 3;
+
+  // Check if level 1 is complete (for level switching UI)
+  const isLevel1Complete = progress.get(10)?.completed || false;
 
   // Find current quest (first unlocked)
   const currentQuest = questsWithStatus.find(q => q.status === 'unlocked')
@@ -155,6 +172,7 @@ export function useQuestProgress() {
     totalStars,
     maxStars,
     currentQuest,
+    isLevel1Complete,
     getQuestStatus,
     getStarsEarned,
     completeQuest,
