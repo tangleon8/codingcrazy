@@ -14,8 +14,17 @@
 // Export all types from the new types module
 export * from './types/index';
 
-// Legacy export - keep backward compatibility with existing code
-export * from './simulator';
+// Legacy simulator for puzzle levels (backward compatibility)
+export { GameSimulator } from './simulator';
+
+// New modular simulator for RPG world
+export {
+  WorldSimulator,
+  MovementSystem,
+  CombatSystem,
+  InteractionSystem,
+  InventorySystem,
+} from './simulator/index';
 
 // Re-export commonly used types at top level for convenience
 export type {
